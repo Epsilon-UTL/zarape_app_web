@@ -1,0 +1,87 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 31 jul. 2024, 01:34:54
+    Author     : mario
+*/
+
+@media (max-width: 811px) and (max-height: 1081px){
+    #cuerpo {
+        margin: 20px !important;
+    }    
+}
+
+@media (max-width: 385px) and (max-height: 855px) {
+    
+    #cuerpo {
+        border-style: none !important;
+        border-radius: 0 !important;
+        border-color: transparent !important;
+        margin-bottom: 0px !important;
+        margin-right: 0px !important;
+        margin-top: 0px !important;
+        margin-left: 5px !important;
+    }
+}
+
+
+
+#cuerpo{
+    margin: 40px;
+    width: 95%; 
+    height: 500px;
+    border-style: solid;
+    border-radius: 25px;
+    border-color: orange;
+    
+}
+
+footer {
+    text-align: center;
+}
+
+#logozarape{
+    width: 250px;
+    height: 250px; /*arriba abajo, altura*/
+}
+
+#d{
+display: flex;
+justify-content: center; 
+
+}
+
+.container {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Alinear horizontalmente */
+            justify-content: center; /* Alinear verticalmente */
+            height: 250px; /* O la altura que desees */
+        }
+        .row {
+            width: 100%; /* Hacer que cada fila ocupe todo el ancho del contenedor */
+            display: flex;
+            justify-content: center; /* Alinear elementos dentro de la fila */
+        }
+        .col-12 {
+            display: flex;
+            justify-content: center;
+            padding: 10px
+        }
+        
+        
+#usuario{
+    width: 400px;
+}
+
+#contraseña{
+ width: 400px;   
+}
+
+#botonIngresar{
+    display: flex;
+            justify-content: center;
+            padding: 20px
+}
