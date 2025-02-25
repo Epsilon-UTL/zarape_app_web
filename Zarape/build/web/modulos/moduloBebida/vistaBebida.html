@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<div class="content">
+
+        <!-- Menú lateral -->
+        <div class="menu-lateral" id="menuLateral">
+            <button type="button" class="btn btn-block botonLateral mt-3" onclick="cargarServicioSucursal();">Sucursal</button>
+            <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioEmpleado();">Empleado</button>
+            <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioAlimento();">Alimento</button>
+            <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioBebida();">Bebida</button>
+            <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioCliente();">Cliente</button>
+
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="activos" checked onchange="controladorGra1.mostrarInactivos()"/>
+                <label class="form-check-label" for="activos">Activos</label>
+            </div>
+                <i class="fa-solid fa-house fa-2xl" onclick="loadInicio();"></i><br>
+                <span>Inicio</span>
+                <i class="fas fa-power-off fa-2xl mt-3" onclick="cerrarSesion();"></i><br>
+                <span>Cerrar Sesión</span>
+        </div>
+
+        <!-- Contenido principal -->
+        <main class="main" id="main-content">
+            <!-- Aquí va el contenido principal de la página -->
+            <div id="content" class="container-fluid" onclick="controladorGra1.loadCategoriaBd();">
+  <div id="barraSuperior">
+      <div class="toggle_btn" onclick="mostrarMenu();">
+          <i class="fa-solid fa-bars"></i>
+      </div>
+    <h2 class="text-center">Gestión de Bebidas</h2>
+    <div class="menuDesplegable">
+          <li><a class="action_btn" onclick="cargarServicioSucursal()">Sucursal</a></li>
+          <li><a class="action_btn" onclick="cargarServicioEmpleado();">Empleado</a></li>
+          <li><a class="action_btn" onclick="cargarServicioAlimento();">Alimento</a></li>
+          <li><a class="action_btn" onclick="cargarServicioBebida();">Bebida</a></li>
+          <li><a class="action_btn" onclick="cargarServicioCliente();">Cliente</a></li>
+          <li><a class="action_btn" onclick="loadInicio();">Inicio</a></li>
+          <li><a class="action_btn" onclick="loadLogin();">Login</a></li>
+      </div>
+  </div>
+
+  <div id="formulario-contenedor" class="d-none">
+    <form id="form-agregar">
+      <div class="row mb-2">
+        <div class="col-md-6 col-sm-12">
+          <input type="text" id="idBebida" class="form-control" placeholder="ID Bebida" disabled />
+        </div>
+        <div class="col-md-6 col-sm-12">
+          <input type="text" id="nombre" class="form-control" placeholder="Nombre" />
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6 col-sm-12">
+          <input type="text" id="precio" class="form-control" placeholder="Precio" />
+        </div>
+        <div class="col-md-6 col-sm-12">
+          <input type="text" id="descripcion" class="form-control" placeholder="Descripción" />
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6 col-sm-12">
+          <select id="categoria" class="form-control">
+            <!-- Opciones de estados se cargarán aquí -->
+          </select>
+        </div>
+        <div class="col-md-6 col-sm-12">
+            <input type="text" id="foto" class="form-control" placeholder="Foto" />
+        </div>
+      </div>
+      <button type="button" class="btn w-20 mb-2" style="background-color: #D00303; color: white; font-weight: bold" onclick="controladorGra1.agregarBebida();">Guardar</button>
+      <button id="btn-eliminar" type="button" class="btn w-20 mb-2" style="background-color: #FA4032; color: white; font-weight: bold" onclick="controladorGra1.eliminarBebida();">Eliminar</button>
+      <button type="button" class="btn w-20 mb-2" style="background-color: #FAAF08; color: white; font-weight: bold" onclick="controladorGra1.cancelarFormulario();">Cancelar</button>
+    </form>
+  </div>
+
+  <!-- Botón de agregar -->
+  <button id="btn-agregar" class="btn w-20" style="background-color: #D00303; color: white; font-weight: bold" onclick="controladorGra1.mostrarFormulario();">Agregar</button>
+
+  <!-- Tabla -->
+  <div class="table-responsive" style="overflow-y: auto">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>NOMBRE</th>
+          <th>DESCRIPCION</th>
+          <th>PRECIO</th>
+          <th>CATEGORIA</th>
+          <th>FOTO</th>
+        </tr>
+      </thead>
+      <tbody id="renglones">
+        <!-- Los datos de los empleados se inyectarán aquí -->
+      </tbody>
+    </table>
+  </div>
+</div>
+        </main>
+    </div>
+
+    <script>
+        const menuToggle = document.getElementById("menu-toggle");
+        const menuLateral = document.querySelector(".menu-lateral");
+        const content = document.querySelector(".content");
+
+        // Acción para mostrar y ocultar el menú lateral
+        menuToggle.addEventListener("click", () => {
+            menuLateral.classList.toggle("active");
+            content.classList.toggle("active-main");
+        });
+    </script>

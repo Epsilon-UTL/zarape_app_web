@@ -1,0 +1,217 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 31 jul. 2024, 01:59:40
+    Author     : mario
+*/
+
+@media(max-width: 384px) {
+    #botonBarra {
+        display: block;
+    }
+    
+    .menu-lateral {
+        display: none !important;
+        transition: height 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .menu-lateral.open {
+        display: block !important;
+    }
+    
+    .main {
+        width: 350px !important;
+        margin-left: 0px !important;
+        padding: 0px !important;
+    }
+    
+    #content {
+        padding: 0px !important;
+    }
+    
+    #barraSuperior {
+        padding-left: 0px !important;
+        justify-content: left !important;
+    }
+    
+    
+    .btn-menu-toggle {
+    display: block !important;
+    padding: 0px !important;
+    margin-left: 10px !important;
+    }
+    
+    .text-center {
+        padding-left: 45px !important;
+    }
+    
+    
+    
+    #form-agregar {
+        margin: 10px !important;
+    }
+    
+    .botonForm {
+        font-size: 10px !important;
+    }
+    
+}
+
+
+
+
+/* Estilos globales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    height: 100%; /* Asegura que el body y el html tengan la altura completa de la ventana */
+    overflow: hidden; /* Evita que aparezca el scroll */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow: hidden; /* Evita el scroll vertical en el cuerpo */
+}
+
+.content {
+    display: flex;
+    flex: 1;
+    overflow: hidden; /* Evita el scroll en el contenedor principal */
+}
+
+/* Barra lateral siempre visible en pantallas grandes */
+.barraLateral {
+    width: 250px;
+    background-color: #FAAF08;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0; /* Siempre visible */
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: white;
+    z-index: 1000;
+}
+
+/* Contenido principal */
+.main {
+    margin-left: 160px; /* Deja espacio para la barra lateral */
+    padding: 20px;
+    flex-grow: 1;
+    transition: margin-left 0.3s ease;
+}
+
+/* Estilos del menú lateral */
+.menu-lateral {
+    width: 150px;
+    background-color: #FAAF08;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra los botones */
+    color: white;
+    z-index: 1000;
+}
+
+/* Estilos de los botones del menú lateral */
+.menu-lateral button {
+    width: 80%; /* Botones más pequeños, ajusta el tamaño según sea necesario */
+    text-align: center; /* Centra el texto dentro de los botones */
+    color: black; /* Texto negro */
+    background-color: white; /* Fondo blanco */
+    border: 1px solid #ccc; /* Bordes suaves para los botones */
+    padding: 10px;
+    font-size: 18px;
+    margin: 10px 0; /* Espaciado entre los botones */
+    cursor: pointer; /* Aparece el puntero del mouse al pasar por encima */
+}
+
+/* Estilos del icono en el pie del menú lateral */
+.menu-lateral .iconoLateral {
+    margin-top: auto;
+    padding: 20px;
+}
+
+.menu-lateral .iconoLateral i {
+    color: white;
+}
+
+/* Estilos del botón de menú */
+.btn-menu-toggle {
+    display: none;
+    background-color: #FAAF08;
+    color: white;
+    font-size: 30px;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+
+/* Estilos del main superior que aparecce en cada modulo */
+#barraSuperior {
+    display: flex;
+    background-color: #FAAF08;
+    padding: 15px;
+    color: white;
+    justify-content: center;
+}
+
+/* Estilos para las letras de encabezado */
+.text-center {
+    margin: 0px;
+    align-content: center;
+}
+
+#btn-agregar {
+    margin: 6px;
+}
+
+th {
+    background-color: #d6d6d6 !important;
+}
+
+/* Estilo para campos válidos */
+input:valid, select:valid {
+    border: 2px solid green;
+}
+
+/* Estilo para campos inválidos */
+input:invalid, select:invalid {
+    border: 2px solid red;
+}
+
+/* Mensajes de error visibles para campos inválidos */
+input:invalid + .error-message, select:invalid + .error-message {
+    display: block;
+    color: red;
+}
+
+/* Ocultar mensajes de error por defecto */
+.error-message {
+    display: none;
+}
+
+#form-agregar input:invalid {
+    border-color: red;
+}
+
+#form-agregar div {
+    color: red;
+    font-size: 12px;
+}

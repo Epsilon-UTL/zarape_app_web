@@ -1,0 +1,59 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 31 jul. 2024, 21:26:27
+    Author     : mario
+*/
+
+@media (max-width: 811px) and (max-height: 1081px) {
+    .boton { 
+        width: 200px !important; 
+        height: 120px !important;
+    }
+}
+
+@media (max-width: 385px) and (max-height: 855px) {
+    .boton { 
+        width: 89px !important; 
+        height: 60px !important;
+        font-size: 12px !important;
+    }
+    
+    .navbar-brand {
+         width: 200px !important;
+    }
+}
+
+html, body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.boton {
+    margin: 10px; 
+    width: 300px; 
+    height: 150px;
+    font-size: 1.5rem;
+}
+
+.logo {
+    width: 200px; 
+    height: 200px;
+}
+
+.fa-power-off {
+    color: black;
+    margin-left: 30px;
+}
+
+#cuerpo {
+    margin: 40px;
+    width: 95%;
+    height: 600px;
+    border-style: solid;
+    border-radius: 25px; 
+    border-color: orange;
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+       <div class="container text-center">
+           <img src="Imagenes/Logo.png" class="img-fluid logo" alt="El Zarape" align="middle"/>
+       </div>       
+     
+        <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <nav>
+                    <a class="navbar-brand" onclick="cargarServicioSucursal();">
+                    <button type="button" class="btn btn-light p-4 boton" style="box-shadow: 8px 8px rgba(0, 0, 0, 0.2); background-color: #FAAF08">
+                    Sucursal
+                    </button>
+                    </a>
+                    <a class="navbar-brand" onclick="cargarServicioEmpleado();">
+                        
+                        <button type="button" class="btn btn-light p-4 boton" style="box-shadow: 8px 8px rgba(0, 0, 0, 0.2); background-color: #FAAF08">
+                    Empleado
+                    </button>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-auto">
+                <nav>
+                    <a onclick="cargarServicioAlimento();">
+                    <button type="button" class="btn btn-light p-4 boton" style="box-shadow: 8px 8px rgba(0, 0, 0, 0.2); background-color: #FAAF08">
+                        Alimento
+                    </button></a>
+                    
+                    <a onclick="cargarServicioBebida();">
+                    <button type="button" class="btn btn-light p-4 boton" style="box-shadow: 8px 8px rgba(0, 0, 0, 0.2); background-color: #FAAF08">
+                    Bebida
+                    </button></a>
+
+                    <a onclick="cargarServicioCliente();;">
+                    <button type="button" class="btn btn-light btn-block p-4 boton" style="box-shadow: 8px 8px rgba(0, 0, 0, 0.2); background-color: #FAAF08">
+                    Cliente
+                    </button></a>
+                    
+                </nav>
+            </div>
+            </div>
+        </div>
+    </body>
+    <footer class="text-start flex-column">
+        <div class="m-3">
+            <a class="text-decoration-none" style="padding-right: 3px" onclick="controladorGra1.cerrarSesion();">
+                <i class="fa-solid fa-power-off fa-2xl"></i><br>
+                <span style="color: black">Cerrar Sesion</span></a>
+        </div>
+    </footer>
