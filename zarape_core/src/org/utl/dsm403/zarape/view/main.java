@@ -1,10 +1,13 @@
 package org.utl.dsm403.zarape.view;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import org.glassfish.jersey.internal.guava.Ticker;
 import org.utl.dsm403.zarape.control.ControllerAlimento;
 import org.utl.dsm403.zarape.control.ControllerBebida;
 import org.utl.dsm403.zarape.control.ControllerCliente;
+import org.utl.dsm403.zarape.control.ControllerComanda;
 import org.utl.dsm403.zarape.control.ControllerEmpleado;
 import org.utl.dsm403.zarape.model.Ciudad;
 import org.utl.dsm403.zarape.model.Empleado;
@@ -13,12 +16,16 @@ import org.utl.dsm403.zarape.model.Persona;
 import org.utl.dsm403.zarape.model.Sucursal;
 import org.utl.dsm403.zarape.model.Usuario;
 import org.utl.dsm403.zarape.control.ControllerSucursal;
+import org.utl.dsm403.zarape.control.ControllerTicket;
 import org.utl.dsm403.zarape.control.ControllerUsuario;
 import org.utl.dsm403.zarape.model.Alimento;
 import org.utl.dsm403.zarape.model.Bebida;
 import org.utl.dsm403.zarape.model.Categoria;
 import org.utl.dsm403.zarape.model.Cliente;
+import org.utl.dsm403.zarape.model.Comanda;
+import org.utl.dsm403.zarape.model.DetalleTicket;
 import org.utl.dsm403.zarape.model.Producto;
+import org.utl.dsm403.zarape.model.Ticket;
 
 public class main {
     public static void main(String[] args) throws SQLException {
@@ -36,7 +43,9 @@ public class main {
 //        addBebida();
 //        actualizarBebida();
 //        eliminarBebida();
-          mostrarUsuarios();
+//          mostrarUsuarios();
+//        insertarTicketTest();
+        insertarComanda();
     }
     
 //    private static void add() throws SQLException
@@ -222,5 +231,29 @@ public static void mostrar() {
     {
         ControllerBebida ctrbebida = new ControllerBebida();
         System.out.println(ctrbebida.delete(107));
+    }
+
+    private static void insertarTicketTest() throws SQLException {
+        // Crear una instancia del ControllerTicket
+        ControllerTicket ticketDAO = new ControllerTicket();
+
+        // Crear lista de detalles
+        List<DetalleTicket> detalles = new ArrayList<>();
+        detalles.add(new DetalleTicket(2, 0.0, null, 101)); // cantidad = 2, idProducto = 101
+        detalles.add(new DetalleTicket(1, 0.0, null, 102)); // cantidad = 1, idProducto = 102
+
+        // Llamar al método insertarTicket
+        int resultado = ticketDAO.insertarTicket(30, 2, detalles);
+
+        // Mostrar el resultado
+        System.out.println("Resultado de la inserción del ticket: " + resultado);
+    }
+    
+    private static void insertarComanda() throws SQLException{
+        ControllerComanda ctrlcomanda = new ControllerComanda();
+        Comanda comande = new Comanda();
+        Ticket ticket = new Ticket(1, "", "", "", 0, 0, 0);
+        comande.setTicket(ticket);
+        ctrlcomanda.addComanda(comande);
     }
 }
