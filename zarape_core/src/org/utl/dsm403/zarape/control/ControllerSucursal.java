@@ -1,6 +1,5 @@
 package org.utl.dsm403.zarape.control;
 
-import com.mysql.cj.jdbc.PreparedStatementWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.utl.dsm403.zarape.db.ConexionMySQL;

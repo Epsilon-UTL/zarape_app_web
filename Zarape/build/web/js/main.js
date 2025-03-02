@@ -30,6 +30,25 @@ function loadLogin() {
         .catch(error => console.error("Error al cargar la vista de login:", error));
 }
 
+function loadOnsite(){
+    fetch('modulos/moduloPuntoVenta/vistaPuntoVenta.html')
+            .then(response=>response.text())
+            .then(html=>{
+                document.getElementById("maincontent").innerHTML=html;
+                import("../modulos/moduloPuntoVenta/controladorPuntoVenta.js").then(
+                        function(controller){
+                        });
+                const existingLink = document.querySelector('link[href="inicio/css-inicio.css"]');
+                if (existingLink) {
+                    existingLink.remove();
+                }
+                const link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.href="modulos/css-modulos.css";
+                document.head.appendChild(link);
+            });
+}
+
 function loadInicio() {
     fetch('inicio/inicio.html')
             .then(response=>response.text())
