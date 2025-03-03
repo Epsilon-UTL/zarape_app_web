@@ -3,11 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package org.utl.dsm403.rest;
+
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.FormParam;
@@ -37,31 +35,37 @@ public class RESTComanda {
         Gson gson = new Gson();
 
         try {
+            if (datosComanda == null || datosComanda.isEmpty()) {
+                out = "{\"error\":\"Datos de la comanda no proporcionados\"}";
+                return Response.status(Response.Status.BAD_REQUEST).entity(out).build();
+            }
+
             c = gson.fromJson(datosComanda, Comanda.class);
+
             if (c == null) {
                 throw new JsonSyntaxException("Formato de datos no válido");
             }
 
             ctrl = new ControllerComanda();
             c = ctrl.addComanda(c);
-            out = gson.toJson(c);
-        } catch (JsonSyntaxException jpe) {
-            out = """
-                {"error":"Formato de datos no válido"}
-                """;
-            jpe.printStackTrace();
-        } catch (SQLException e) {
-            out = """
-                {"error":"Error al agregar la comanda en la base de datos."}
-                """;
-            e.printStackTrace();
-        } catch (Exception ex) {
-            out = """
-                {"error":"Error interno del servidor. Intente más tarde."}
-                """;
-            ex.printStackTrace();
-        }
 
-        return Response.status(Response.Status.OK).entity(out).build();
+            out = gson.toJson(c);
+            return Response.status(Response.Status.OK).entity(out).build();
+
+        } catch (JsonSyntaxException jpe) {
+            out = "{\"error\":\"Formato de datos no válido: " + jpe.getMessage() + "\"}";
+            jpe.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST).entity(out).build();
+
+        } catch (SQLException e) {
+            out = "{\"error\":\"Error al agregar la comanda en la base de datos: " + e.getMessage() + "\"}";
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(out).build();
+
+        } catch (Exception ex) {
+            out = "{\"error\":\"Error interno del servidor. Intente más tarde. Detalles: " + ex.getMessage() + "\"}";
+            ex.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(out).build();
+        }
     }
 }
