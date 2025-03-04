@@ -9,10 +9,6 @@ import java.sql.Connection;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.sql.ResultSet; 
-import java.util.ArrayList;
-import java.util.List;
-import java.sql.PreparedStatement;
 import org.utl.dsm403.zarape.db.ConexionMySQL;
 /**
  *
@@ -33,6 +29,7 @@ public class ControllerComanda {
         csmt.registerOutParameter(2, Types.INTEGER);
 
         csmt.executeUpdate();
+        
         v_idComanda = csmt.getInt(2);
         c.setIdComanda(v_idComanda);
 

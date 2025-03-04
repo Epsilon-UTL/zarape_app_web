@@ -31,11 +31,11 @@ function loadLogin() {
 }
 
 function loadOnsite(){
-    fetch('modulos/moduloPuntoVenta/vistaPuntoVenta.html')
+    fetch('cliente/comedor.html')
             .then(response=>response.text())
             .then(html=>{
                 document.getElementById("maincontent").innerHTML=html;
-                import("../modulos/moduloPuntoVenta/controladorPuntoVenta.js").then(
+                import("../cliente/app.js").then(
                         function(controller){
                         });
                 const existingLink = document.querySelector('link[href="inicio/css-inicio.css"]');

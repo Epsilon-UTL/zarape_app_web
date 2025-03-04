@@ -3,6 +3,8 @@ let servidor = window.location.hostname === 'localhost'
         : 'http://192.168.1.8:8082/zarapeWeb/api/';
 let apiAlimentos = 'alimento/getAllAlimento';
 let apiBebidas = 'bebida/getAllBebida';
+let apiTicket = 'ticket/agregarTicket';
+let apiComanda = 'comanda/agregarComanda';
 
 document.addEventListener("DOMContentLoaded", () => {
     // Obtener alimentos

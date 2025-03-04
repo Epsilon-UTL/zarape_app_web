@@ -6,7 +6,6 @@ package org.utl.dsm403.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.POST;

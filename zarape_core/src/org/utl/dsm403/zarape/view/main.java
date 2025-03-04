@@ -233,22 +233,18 @@ public static void mostrar() {
         System.out.println(ctrbebida.delete(107));
     }
 
-    private static void insertarTicketTest() throws SQLException {
-        // Crear una instancia del ControllerTicket
-        ControllerTicket ticketDAO = new ControllerTicket();
-
-        // Crear lista de detalles
-        List<DetalleTicket> detalles = new ArrayList<>();
-        detalles.add(new DetalleTicket(2, 0.0, null, 101)); // cantidad = 2, idProducto = 101
-        detalles.add(new DetalleTicket(1, 0.0, null, 102)); // cantidad = 1, idProducto = 102
-
-        // Llamar al método insertarTicket
-        int resultado = ticketDAO.insertarTicket(30, 2, detalles);
-
-        // Mostrar el resultado
-        System.out.println("Resultado de la inserción del ticket: " + resultado);
-    }
-    
+//    private static void insertarTicketTest() throws SQLException {
+//        ControllerTicket ticketDAO = new ControllerTicket();
+//
+//        List<DetalleTicket> detalles = new ArrayList<>();
+//        detalles.add(new DetalleTicket(2, 0.0, null, 101)); // cantidad = 2, idProducto = 101
+//        detalles.add(new DetalleTicket(1, 0.0, null, 102)); // cantidad = 1, idProducto = 102
+//
+//        int resultado = ticketDAO.insertarTicket(30, 2, detalles);
+//
+//        System.out.println("Resultado de la inserción del ticket: " + resultado);
+//    }
+//    
     private static void insertarComanda() throws SQLException{
         ControllerComanda ctrlcomanda = new ControllerComanda();
         Comanda comande = new Comanda();

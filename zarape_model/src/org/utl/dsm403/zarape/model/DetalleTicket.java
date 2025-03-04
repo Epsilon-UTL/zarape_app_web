@@ -13,15 +13,17 @@ public class DetalleTicket {
     private double precio;
     private Integer idCombo;
     private Integer idProducto;
+    private Ticket ticket;
 
     public DetalleTicket() {
     }
 
-    public DetalleTicket(int cantidad, double precio, Integer idCombo, Integer idProducto) {
+    public DetalleTicket(int cantidad, double precio, Integer idCombo, Integer idProducto, Ticket ticket) {
         this.cantidad = cantidad;
         this.precio = precio;
         this.idCombo = idCombo;
         this.idProducto = idProducto;
+        this.ticket = ticket;
     }
 
     public int getCantidad() {
@@ -56,9 +58,17 @@ public class DetalleTicket {
         this.idProducto = idProducto;
     }
 
+    public Ticket getTicket() {
+        return ticket;
+    }
+
+    public void setTicket(Ticket ticket) {
+        this.ticket = ticket;
+    }
+
     @Override
     public String toString() {
-        return "DetalleTicket{" + "cantidad=" + cantidad + ", precio=" + precio + ", idCombo=" + idCombo + ", idProducto=" + idProducto + '}';
+        return "DetalleTicket{" + "cantidad=" + cantidad + ", precio=" + precio + ", idCombo=" + idCombo + ", idProducto=" + idProducto + ", ticket=" + ticket + '}';
     }
-    
+
 }

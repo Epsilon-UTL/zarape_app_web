@@ -9,9 +9,11 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.sql.SQLException;
 import java.util.List;
 import org.utl.dsm403.zarape.control.ControllerTicket;
 import org.utl.dsm403.zarape.model.DetalleTicket;
+import org.utl.dsm403.zarape.model.Ticket;
 import com.google.gson.reflect.TypeToken;
 
 @Path("ticket") 
@@ -23,11 +25,9 @@ public class RESTTicket {
     @POST 
     @Path("agregarTicket") 
     @Produces(MediaType.APPLICATION_JSON)
-    public Response agregarTicket(
-        @FormParam("datosTicket") String jsonData 
-    ) {
+    public Response agregarTicket(@FormParam("datosTicket") String Ticket) {
         try {
-            JsonObject request = gson.fromJson(jsonData, JsonObject.class);
+            JsonObject request = gson.fromJson(Ticket, JsonObject.class);
 
             int idCliente = request.get("idCliente").getAsInt();
             int idSucursal = request.get("idSucursal").getAsInt();
@@ -41,9 +41,17 @@ public class RESTTicket {
 
             List<DetalleTicket> detalles = gson.fromJson(detallesJson, new TypeToken<List<DetalleTicket>>() {}.getType());
 
-            int result = ticketService.insertarTicket(idCliente, idSucursal, detalles);
+            Ticket ticket = new Ticket();
+            ticket.setIdCliente(idCliente);
+            ticket.setIdSucursal(idSucursal);
 
-            return Response.ok("{\"resultado\": " + result + "}").build();
+            Ticket resultado = ticketService.insertarTicket(ticket, detalles);
+
+            return Response.ok(gson.toJson(resultado)).build();
+        } catch (SQLException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"message\": \"Error en la base de datos: " + e.getMessage() + "\"}")
+                    .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"message\": \"Error al procesar la solicitud: " + e.getMessage() + "\"}")

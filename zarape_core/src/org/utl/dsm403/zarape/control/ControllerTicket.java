@@ -6,50 +6,50 @@ import java.sql.Connection;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.sql.Types;
 import org.utl.dsm403.zarape.db.ConexionMySQL;
 import org.utl.dsm403.zarape.model.DetalleTicket;
+import org.utl.dsm403.zarape.model.Ticket;
 
 public class ControllerTicket {
 
-    public int insertarTicket(int idCliente, int idSucursal, List<DetalleTicket> detalles) throws SQLException {
-        if (detalles == null || detalles.isEmpty()) {
-            throw new IllegalArgumentException("La lista de detalles no puede estar vacía o ser nula.");
-        }
+    public Ticket insertarTicket(Ticket t, List<DetalleTicket> detalles) throws SQLException {
+    String sql = "{CALL InsertarTicket(?, ?, ?, ?)}";
 
-        String sql = "{CALL InsertarTicket(?, ?, ?)}";
-        int resultado = 0; // Variable para almacenar el resultado
+    int v_idTicket;
+    
+    ConexionMySQL connMySQL = new ConexionMySQL();
+    Connection conn = connMySQL.open();
+    
+    CallableStatement csmt = conn.prepareCall(sql);
 
-        try (Connection conn = new ConexionMySQL().open();
-             CallableStatement cstmt = conn.prepareCall(sql)) {
-
-            // Convertir lista de detalles a JSON
-            JsonArray detallesArray = new JsonArray();
-            for (DetalleTicket detalle : detalles) {
-                if (detalle.getIdProducto() == null) {
-                    throw new IllegalArgumentException("Cada detalle debe tener un ID de producto.");
-                }
-
-                JsonObject obj = new JsonObject();
-                obj.addProperty("idProducto", detalle.getIdProducto());
-                obj.addProperty("cantidad", detalle.getCantidad());
-
-                detallesArray.add(obj);
+        JsonArray detallesArray = new JsonArray();
+        
+        for (DetalleTicket detalle : detalles) {
+            if (detalle.getIdProducto() == null) {
+                throw new IllegalArgumentException("Cada detalle debe tener un ID de producto.");
             }
 
-            // Configurar parámetros
-            cstmt.setInt(1, idCliente);
-            cstmt.setInt(2, idSucursal);
-            cstmt.setString(3, detallesArray.toString());
+            JsonObject obj = new JsonObject();
+            obj.addProperty("idProducto", detalle.getIdProducto());
+            obj.addProperty("cantidad", detalle.getCantidad());
 
-            // Ejecutar la consulta
-            cstmt.execute();
-            resultado = 1; // Éxito
-
-        } catch (SQLException e) {
-            throw new SQLException("Error al ejecutar el procedimiento almacenado: " + e.getMessage(), e);
+            detallesArray.add(obj);
         }
 
-        return resultado;
-    }
+        csmt.setInt(1, t.getIdCliente());  
+        csmt.setInt(2, t.getIdSucursal());
+        csmt.setString(3, detallesArray.toString());
+        csmt.registerOutParameter(4, Types.INTEGER); 
 
+        csmt.executeUpdate();
+
+        v_idTicket = csmt.getInt(4);
+        
+        t.setIdTicket(v_idTicket);
+        csmt.close();
+        conn.close();
+        
+        return t;
+    }
 }

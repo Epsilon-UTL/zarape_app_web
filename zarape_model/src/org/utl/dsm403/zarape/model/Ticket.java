@@ -11,7 +11,7 @@ package org.utl.dsm403.zarape.model;
 public class Ticket {
     private int idTicket;
     private String ticket;
-    private String fecha; // Se usa String para manejar fechas con formatos flexibles
+    private String fecha; 
     private String pagado;
     private int idCliente;
     private int idSucursal;
@@ -90,6 +90,5 @@ public class Ticket {
     public String toString() {
         return "Ticket{" + "idTicket=" + idTicket + ", ticket=" + ticket + ", fecha=" + fecha + ", pagado=" + pagado + ", idCliente=" + idCliente + ", idSucursal=" + idSucursal + ", estatus=" + estatus + '}';
     }
-
     
 }
