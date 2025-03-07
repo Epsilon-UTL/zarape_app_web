@@ -1,6 +1,6 @@
 let servidor = window.location.hostname === 'localhost'
-        ? 'http://localhost:8082/zarapeWeb/api/'
-        : 'http://192.168.1.8:8082/zarapeWeb/api/';
+        ? 'http://localhost:8080/Zarape/api/'
+        : 'http://192.168.1.8:8080/Zarape/api/';
 let apiAlimentos = 'alimento/getAllAlimento';
 let apiBebidas = 'bebida/getAllBebida';
 let apiTicket = 'ticket/agregarTicket';
@@ -339,4 +339,40 @@ function realizarPago() {
     }
 
     document.getElementById('pagoMensaje').innerText = mensaje;
+}
+
+
+function guardarComanda() {
+    if (pedidos.length === 0) {
+        alert("No hay pedidos para guardar.");
+        return;
+    }
+
+    const comandaData = {
+        idCliente: 1,
+        idSucursal: 1,
+        detalles: pedidos.map(pedido => ({
+            idProducto: pedido.idProducto,
+            cantidad: pedido.cantidad
+        }))
+    };
+
+    fetch(servidor + apiComanda, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(comandaData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Respuesta del servidor:", data);
+        alert("Comanda guardada correctamente con ID: " + data.ticket.idTicket);
+        
+        
+    })
+    .catch(error => {
+        console.error("Error al guardar la comanda:", error);
+        alert("Error al guardar la comanda. Intenta nuevamente.");
+    });
 }
