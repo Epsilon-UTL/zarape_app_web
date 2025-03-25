@@ -1,437 +1,376 @@
 let listCliente = [];
-let listEstados =[];
+let listEstados = [];
 let listCiudades = [];
 
-export function loadCiudades() {
-    let v_edo = document.getElementById("estados").value;
-    let v_ciudades = document.getElementById("ciudades");
+let idPersona = null;
+let idUsuario = null;
+let validacionesInicializadas = false;
+
+// Función para inicializar todas las validaciones
+export function inicializarValidaciones() {
+    if (validacionesInicializadas) return;
     
-    while (v_ciudades.options.length >= 1) {
-        v_ciudades.remove(v_ciudades.options.length - 1);
-    }
-    
-    listCiudades.forEach(ciudad => {
-        if (ciudad.estado.idEstado == v_edo) {
-            let option = document.createElement("option");
-            option.value = ciudad.idCiudad;
-            option.text = ciudad.nombre;
-            v_ciudades.appendChild(option);
+    console.log("Inicializando validaciones para cliente...");
+
+    // Validación del nombre
+    document.getElementById("nombre")?.addEventListener("input", function () {
+        validarCampo(
+            this,
+            /^[a-zA-Z]+(?: [a-zA-Z]+)*$/,
+            1,
+            45,
+            document.getElementById("error-nombre"),
+            "El nombre debe contener solo letras, sin acentos, y un espacio entre palabras."
+        );
+    });
+
+    // Validación de los apellidos
+    document.getElementById("apellidos")?.addEventListener("input", function () {
+        validarCampo(
+            this,
+            /^[a-zA-Z]+(?: [a-zA-Z]+)*$/,
+            1,
+            45,
+            document.getElementById("error-apellidos"),
+            "Los apellidos deben contener solo letras, sin acentos, y un espacio entre palabras."
+        );
+    });
+
+    // Validación del teléfono
+    document.getElementById("telefono")?.addEventListener("input", function () {
+        validarCampo(
+            this,
+            /^\d{10}$/,
+            10,
+            10,
+            document.getElementById("error-telefono"),
+            "El teléfono debe contener exactamente 10 dígitos numéricos sin espacios."
+        );
+    });
+
+    // Validación del usuario
+    document.getElementById("usuario")?.addEventListener("input", function () {
+        validarCampo(
+            this,
+            /^[a-zA-Z@]{5,30}$/,
+            5,
+            30,
+            document.getElementById("error-usuario"),
+            "El nombre de usuario debe tener entre 5 y 30 caracteres y solo puede contener letras y el símbolo @."
+        );
+    });
+
+    // Validación de la contraseña
+    document.getElementById("contrasenia")?.addEventListener("input", function () {
+        validarCampo(
+            this,
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$_-])[A-Za-z\d@#$_-]{8,15}$/,
+            8,
+            15,
+            document.getElementById("error-contrasenia"),
+            "La contraseña debe tener entre 8 y 15 caracteres, incluir al menos una mayúscula, una minúscula, un número y un carácter especial (@, #, $, -, _)."
+        );
+    });
+
+    // Validar formulario antes de enviar
+    document.getElementById("btn-guardar")?.addEventListener("click", function (event) {
+        const errores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div");
+        if (errores.length > 0) {
+            event.preventDefault();
+            alert("Hay errores en el formulario. Corrígelos antes de continuar.");
         }
     });
+
+    validacionesInicializadas = true;
 }
 
+// Función para cargar las ciudades basadas en el estado seleccionado
+export function loadCiudades() {
+    const v_edo = document.getElementById("estados")?.value;
+    const v_ciudades = document.getElementById("ciudades");
+    
+    if (!v_edo || !v_ciudades) return;
+
+    v_ciudades.innerHTML = '';
+
+    const ciudadesFiltradas = listCiudades.filter(ciudad => ciudad.estado.idEstado == v_edo);
+    ciudadesFiltradas.forEach(ciudad => {
+        const option = document.createElement("option");
+        option.value = ciudad.idCiudad;
+        option.text = ciudad.nombre;
+        v_ciudades.appendChild(option);
+    });
+}
+
+// Cargar ciudades desde el servidor
 fetch('http://localhost:8080/Zarape/api/ciudad/getAllCiudades')
-    .then(response => response.json())
+    .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
     .then(city => {
-        console.log(city);
         listCiudades = city;
         loadCiudades();
-    });
+    })
+    .catch(error => console.error("Error al cargar las ciudades:", error));
 
-document.getElementById("estados").addEventListener('change', function() {
-    loadCiudades();
-});
+// Escuchar cambios en el select de estados
+document.getElementById("estados")?.addEventListener('change', loadCiudades);
 
+// Función para cargar los estados
 export function loadEstados() {
-    let v_estados = document.getElementById("estados");
-    listEstados.forEach(
-            estado=>{
-                let v_option = document.createElement("option");
-                v_option.value = estado.idEstado;
-                v_option.text = estado.nombre;
-                v_estados.appendChild(v_option);
-            }
-            );
+    const v_estados = document.getElementById("estados");
+    if (!v_estados) return;
+    
+    v_estados.innerHTML = '';
+    listEstados.forEach(estado => {
+        const option = document.createElement("option");
+        option.value = estado.idEstado;
+        option.text = estado.nombre;
+        v_estados.appendChild(option);
+    });
 }
 
+// Cargar estados desde el servidor
 fetch('http://localhost:8080/Zarape/api/datos/getAllEstados')
-        .then(response=> response.json())
-        .then(
-            datos=>{
-                console.log(datos);
-                listEstados=datos;
-                loadEstados();
-            }
-        );
+    .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
+    .then(datos => {
+        listEstados = datos;
+        loadEstados();
+    })
+    .catch(error => console.error("Error al cargar los estados:", error));
 
-
-function toggleDropdown() {
-    document.getElementById("myDropdown").classList.toggle("show");
-}
-
+// Función para mostrar/ocultar el formulario
 export function mostrarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
     const btnGuardar = document.getElementById("btn-agregar");
-    btnGuardar.classList.add("d-none");
-    formularioContenedor.classList.remove("d-none"); // Muestra el formulario
+    
+    if (formularioContenedor && btnGuardar) {
+        btnGuardar.classList.add("d-none");
+        formularioContenedor.classList.remove("d-none");
+    }
 }
 
+// Función para cancelar el formulario
 export function cancelarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
     const btnGuardar = document.getElementById("btn-agregar");
-    btnGuardar.classList.remove("d-none");
-    formularioContenedor.classList.add("d-none"); // Oculta el formulario
+    
+    if (formularioContenedor && btnGuardar) {
+        btnGuardar.classList.remove("d-none");
+        formularioContenedor.classList.add("d-none");
+    }
+    
     limpiar();
+    limpiarMensajesError();
+    validacionesInicializadas = false;
 }
 
-    export function loadCliente(){
-        mostrarInactivos();
-    }
+// Función para cargar los clientes
+export function loadCliente() {
     const username = localStorage.getItem("nombreUsuario");
+    if (!username) return;
+
     fetch("http://localhost:8080/Zarape/api/cliente/getAllCliente", {
         method: "GET",
-        headers: {
-            "username": username,
-            "Content-Type": "application/json"
-        }
+        headers: { "username": username, "Content-Type": "application/json" }
     })
-        .then(response=>response.json())
-        .then(
-        registro=>{
-            console.log(registro);
-            listCliente=registro;
-            loadCliente();
-        });
-        
+        .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
+        .then(registro => {
+            listCliente = registro;
+            mostrarInactivos();
+        })
+        .catch(error => console.error("Error al cargar los clientes:", error));
+}
+
+// Función para agregar un cliente
 export function agregarCliente() {
     const username = localStorage.getItem("nombreUsuario");
-    
-    let v_idPersona = idPersona || -1;
-    let v_idUsuario = idUsuario || -1;
-    let v_id = document.getElementById("idCliente").value || -1;
-    let v_nombre = document.getElementById("nombre").value;
-    let v_apellidos = document.getElementById("apellidos").value;
-    let v_telefono = document.getElementById("telefono").value;
-    let v_ciudad = document.getElementById("ciudades").value;
-    let v_estado = document.getElementById("estados").value;
-    let v_user = document.getElementById("usuario").value;
-    let v_contrasenia = document.getElementById("contrasenia").value;
+    if (!username) return;
 
-    let cliente = {
-        idCliente: v_id,
-        activo: 1,  
+    const errores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div");
+    if (errores.length > 0) {
+        alert("Hay errores en el formulario. Corrígelos antes de continuar.");
+        return;
+    }
+
+    const cliente = {
+        idCliente: -1,
+        activo: 1,
         persona: {
-            idPersona: v_idPersona,  
-            nombre: v_nombre,
-            apellidos: v_apellidos,
-            telefono: v_telefono,
+            idPersona: idPersona || -1,
+            nombre: document.getElementById("nombre").value,
+            apellidos: document.getElementById("apellidos").value,
+            telefono: document.getElementById("telefono").value,
             ciudad: {
-                idCiudad: v_ciudad,
-                nombre: "",  
+                idCiudad: document.getElementById("ciudades").value,
+                nombre: "",
                 estado: {
-                    idEstado: v_estado,  
-                    nombre: "" 
+                    idEstado: document.getElementById("estados").value,
+                    nombre: ""
                 }
             }
         },
         usuario: {
-            idUsuario: v_idUsuario,  
+            idUsuario: idUsuario || -1,
             activo: 1,
-            nombre: v_user,
-            contrasenia: v_contrasenia
+            nombre: document.getElementById("usuario").value,
+            contrasenia: document.getElementById("contrasenia").value
         }
     };
 
-    let datos_servidor = { datosCliente: JSON.stringify(cliente) };
-    let parametro = new URLSearchParams(datos_servidor);
+    const parametro = new URLSearchParams({ datosCliente: JSON.stringify(cliente) });
 
-    let registro = {
+    fetch('http://localhost:8080/Zarape/api/cliente/agregarCliente', {
         method: "POST",
-        headers: { 
-            "Content-Type": "application/x-www-form-urlencoded",
-            "username": username 
-        },
-        body: parametro
-    };
-
-    fetch('http://localhost:8080/Zarape/api/cliente/agregarCliente', registro)
-        .then(response => response.json())
-        .then(json => {
-            console.log(json);
-            fetch('http://localhost:8080/Zarape/api/cliente/getAllCliente', {
-                headers: { "username": username }
-            })
-            .then(response => response.json())
-            .then(registro => {
-                listCliente = registro;
-                loadCliente();
-            })
-            .catch(error => console.error("Error al obtener clientes:", error));
-        })
-        .catch(error => console.error("Error al agregar el cliente:", error));
-
-    limpiar();
-    cancelarFormulario();
-}
-
-export function eliminarCliente() {
-    const username = localStorage.getItem("nombreUsuario");
-    
-    let v_idCliente = document.getElementById("idCliente").value; 
-    let datos_servidor = { idCliente: v_idCliente };
-    let parametro = new URLSearchParams(datos_servidor);
-
-    let registro = {
-        method: "POST",
-        headers: { 
+        headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             "username": username
         },
         body: parametro
-    };
-
-    console.log(registro); 
-
-    fetch('http://localhost:8080/Zarape/api/cliente/eliminarCliente', registro)
-        .then(response => response.json())
-        .then(json => {
-            console.log(json); 
-
-            fetch('http://localhost:8080/Zarape/api/cliente/getAllCliente', {
-                headers: { "username": username } 
-            })
-            .then(response => response.json())
-            .then(registro => {
-                listCliente = registro; 
-                mostrarInactivos(); 
-            })
-            .catch(error => console.error("Error al obtener la lista de clientes:", error));
-        })
-        .catch(error => console.error("Error al eliminar el cliente:", error));
-
-    limpiar(); 
-    cancelarFormulario(); 
+    })
+        .then(response => response.ok ? response.json() : Promise.reject('Error al agregar'))
+        .then(() => loadCliente())
+        .catch(error => console.error("Error al agregar el cliente:", error))
+        .finally(() => {
+            limpiar();
+            cancelarFormulario();
+        });
 }
 
+// Función para eliminar un cliente
+export function eliminarCliente() {
+    if (!idPersona) {
+        alert("No hay ningún cliente seleccionado para eliminar");
+        return;
+    }
 
-let idPersona = null;
-let idUsuario = null;
+    if (!confirm("¿Estás seguro de que deseas eliminar este cliente?")) return;
 
-export function selectRegistro(indice) { 
-    document.getElementById("idCliente").value = listCliente[indice].idCliente;
-    document.getElementById("nombre").value = listCliente[indice].persona.nombre;
-    document.getElementById("apellidos").value = listCliente[indice].persona.apellidos;
-    document.getElementById("telefono").value = listCliente[indice].persona.telefono;
-    document.getElementById("estados").value = listCliente[indice].persona.ciudad.estado.idEstado;
-    document.getElementById("ciudades").value = listCliente[indice].persona.ciudad.idCiudad;
-    document.getElementById("usuario").value = listCliente[indice].usuario.nombre;
-    document.getElementById("contrasenia").value = listCliente[indice].usuario.contrasenia;
-    idPersona = listCliente[indice].persona.idPersona;
-    idUsuario = listCliente[indice].usuario.idUsuario;
-    controladorGra1.mostrarFormulario();
+    const username = localStorage.getItem("nombreUsuario");
+    if (!username) return;
+
+    const clienteAEliminar = listCliente.find(cli => cli.persona.idPersona === idPersona);
+    if (!clienteAEliminar) {
+        alert("No se encontró el cliente a eliminar");
+        return;
+    }
+
+    const parametro = new URLSearchParams({ idCliente: clienteAEliminar.idCliente });
+
+    fetch('http://localhost:8080/Zarape/api/cliente/eliminarCliente', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "username": username
+        },
+        body: parametro
+    })
+        .then(response => response.ok ? response.json() : Promise.reject('Error al eliminar'))
+        .then(() => loadCliente())
+        .catch(error => console.error("Error al eliminar el cliente:", error))
+        .finally(() => {
+            limpiar();
+            cancelarFormulario();
+        });
 }
 
+// Función para seleccionar un registro
+export function selectRegistro(indice) {
+    if (indice < 0 || indice >= listCliente.length) return;
+
+    const cliente = listCliente[indice];
+    document.getElementById("nombre").value = cliente.persona.nombre;
+    document.getElementById("apellidos").value = cliente.persona.apellidos;
+    document.getElementById("telefono").value = cliente.persona.telefono;
+    document.getElementById("estados").value = cliente.persona.ciudad.estado.idEstado;
+    document.getElementById("usuario").value = cliente.usuario.nombre;
+    document.getElementById("contrasenia").value = cliente.usuario.contrasenia;
+    
+    idPersona = cliente.persona.idPersona;
+    idUsuario = cliente.usuario.idUsuario;
+    
+    mostrarFormulario();
+    loadCiudades();
+    
+    setTimeout(() => {
+        document.getElementById("ciudades").value = cliente.persona.ciudad.idCiudad;
+    }, 100);
+}
+
+// Función para limpiar el formulario
+export function limpiar() {
+    ["nombre", "apellidos", "telefono", "estados", "ciudades", "usuario", "contrasenia"].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.value = "";
+    });
+    idPersona = null;
+    idUsuario = null;
+}
+
+// Función para limpiar mensajes de error
+export function limpiarMensajesError() {
+    document.querySelectorAll('[id^="error-"]').forEach(error => error.innerHTML = '');
+}
+
+// Función para mostrar clientes activos/inactivos
+export function mostrarInactivos() {
+    const mostrarActivos = document.getElementById("activos")?.checked;
+    const table = document.getElementById("renglones");
+    if (!table) return;
+
+    let renglon = listCliente
+        .filter(registro => mostrarActivos ? registro.activo === 1 : registro.activo === 0)
+        .map((registro, index) => `
+            <tr onclick='controladorGra1.selectRegistro(${index});'>
+                <td>${registro.persona.nombre}</td>
+                <td>${registro.persona.apellidos}</td>
+                <td>${registro.persona.telefono}</td>
+                <td>${registro.persona.ciudad.nombre}</td>
+                <td>${registro.persona.ciudad.estado.nombre}</td>
+                <td>${registro.usuario.nombre}</td>
+                <td>**********</td>
+            </tr>
+        `).join('');
+
+    table.innerHTML = renglon;
+    
+    const btnGuardar = document.getElementById("btn-agregar");
+    const btnEliminar = document.getElementById("btn-eliminar");
+    if (btnGuardar) btnGuardar.classList.toggle("d-none", !mostrarActivos);
+    if (btnEliminar) btnEliminar.classList.toggle("d-none", !mostrarActivos);
+}
+
+// Función genérica para validar campos
+function validarCampo(input, regex, minLength, maxLength, errorDiv, mensajeError) {
+    if (!input || !errorDiv) return;
+
+    const valor = input.value.trim();
+    errorDiv.innerHTML = '';
+
+    if (!valor || valor.length < minLength || valor.length > maxLength || !regex.test(valor)) {
+        const errorItem = document.createElement("div");
+        errorItem.style.color = "red";
+        errorItem.innerHTML = mensajeError;
+        errorDiv.appendChild(errorItem);
+    }
+}
+
+// Función para cerrar sesión
 export function cerrarSesion() {
-    try {
-        const nombreUsuario = localStorage.getItem('nombreUsuario');
-        console.log(nombreUsuario);
-        if (!nombreUsuario) {
-            console.error('No se encontró el nombre de usuario');
-            return;
-        }
+    const nombreUsuario = localStorage.getItem('nombreUsuario');
+    if (!nombreUsuario) return;
 
-        const url = new URL('http://localhost:8080/Zarape/api/login/cerrarsesion');
-        url.search = new URLSearchParams({ 'nombre': nombreUsuario });
+    const url = new URL('http://localhost:8080/Zarape/api/login/cerrarsesion');
+    url.search = new URLSearchParams({ 'nombre': nombreUsuario });
 
-        fetch(url, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Error al comunicarse con el servidor');
-            }
-            return response.json();
-        })
-        .then(result => {
-            if (result.message) {
-                console.log(result.message);
-            } else if (result.error) {
-                console.error(result.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        })
+    fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    })
+        .then(response => response.ok ? response.json() : Promise.reject('Error al cerrar sesión'))
         .finally(() => {
             localStorage.removeItem('token');
             localStorage.removeItem('nombreUsuario');
             alert("Cerrando sesión");
             loadLogin();
-        });
-
-    } catch (error) {
-        console.error('Error:', error);
-    }
+        })
+        .catch(error => console.error('Error:', error));
 }
-
-export function limpiar() {
-    document.getElementById("idCliente").value = null;
-    document.getElementById("nombre").value = "";
-    document.getElementById("apellidos").value = "";
-    document.getElementById("telefono").value = "";
-    document.getElementById("estados").value = null;;
-    document.getElementById("ciudades").value = null;
-    document.getElementById("usuario").value = "";
-    document.getElementById("contrasenia").value = "";
-}
-
-
-export function mostrarInactivos() {
-    const btnGuardar = document.getElementById("btn-agregar");
-    const btnEliminar = document.getElementById("btn-eliminar");
-    let mostrarActivos = document.getElementById("activos").checked;
-    let table = document.getElementById("renglones");
-    let renglon = "";
-    listCliente.forEach(registro=>{
-        if (mostrarActivos && registro.activo === 1) {
-        renglon+="<tr onclick='controladorGra1.selectRegistro("+listCliente.indexOf(registro)+");'><td>"+registro.persona.nombre+
-                "</td><td>"+registro.persona.apellidos+
-                "</td><td>"+registro.persona.telefono+
-                "</td><td>"+registro.persona.ciudad.nombre+
-                "</td><td>"+registro.persona.ciudad.estado.nombre+
-                "</td><td>"+registro.usuario.nombre+
-                "</td><td>"+'**********'+
-                "</td><tr>";
-        btnGuardar.classList.remove("d-none");
-        btnEliminar.classList.remove("d-none");
-        }else if(!mostrarActivos && registro.activo === 0){
-            renglon+="<tr onclick='controladorGra1.selectRegistro("+listCliente.indexOf(registro)+");'><td>"+registro.persona.nombre+
-                "</td><td>"+registro.persona.apellidos+
-                "</td><td>"+registro.persona.telefono+
-                "</td><td>"+registro.persona.ciudad.nombre+
-                "</td><td>"+registro.persona.ciudad.estado.nombre+
-                "</td><td>"+registro.usuario.nombre+
-                "</td><td>"+'**********'+
-                "</td><tr>";
-        btnGuardar.classList.add("d-none");
-        btnEliminar.classList.add("d-none");
-    }
-    });
-    table.innerHTML=renglon;
-    
-}
-
-document.getElementById("nombre").addEventListener("input", function () {
-    const nombre = this.value.trim();
-    const regex = /^[a-zA-Z]+(?: [a-zA-Z]+)*$/;  
-    const errorDiv = document.getElementById("error-nombre");
-    const errores = [];
-
-    errorDiv.innerHTML = '';
-
-    if (!nombre || nombre.length < 1 || nombre.length > 45 || !regex.test(nombre)) {
-        errores.push("El nombre debe contener solo letras, sin acentos, un espacio entre palabras, y tener entre 1 y 45 caracteres.");
-    }
-
-    if (errores.length > 0) {
-        errores.forEach(error => {
-            const errorItem = document.createElement("div");
-            errorItem.style.color = "red";
-            errorItem.innerHTML = error;
-            errorDiv.appendChild(errorItem);
-        });
-    }
-});
-
-document.getElementById("apellidos").addEventListener("input", function () {
-    const apellidos = this.value.trim();
-    const regex = /^[a-zA-Z]+(?: [a-zA-Z]+)*$/; 
-    const errorDiv = document.getElementById("error-apellidos");
-    const errores = [];
-
-    errorDiv.innerHTML = '';
-
-    if (!apellidos || apellidos.length < 1 || apellidos.length > 45 || !regex.test(apellidos)) {
-        errores.push("Los apellidos debe contener solo letras, sin acentos, un espacio entre palabras, y tener entre 1 y 45 caracteres.");
-    }
-
-    if (errores.length > 0) {
-        errores.forEach(error => {
-            const errorItem = document.createElement("div");
-            errorItem.style.color = "red";
-            errorItem.innerHTML = error;
-            errorDiv.appendChild(errorItem);
-        });
-    }
-});
-
-document.getElementById("telefono").addEventListener("input", function () {
-    const telefono = this.value.trim();
-    const regex = /^\d{10}$/;  
-    const errorDiv = document.getElementById("error-telefono");
-    const errores = [];
-
-    errorDiv.innerHTML = '';
-
-    if (!telefono || !regex.test(telefono)) {
-        errores.push("El teléfono debe contener exactamente 10 dígitos numéricos sin espacios.");
-    }
-
-    if (errores.length > 0) {
-        errores.forEach(error => {
-            const errorItem = document.createElement("div");
-            errorItem.style.color = "red";
-            errorItem.innerHTML = error;
-            errorDiv.appendChild(errorItem);
-        });
-    }
-});
-
-document.getElementById("usuario").addEventListener("input", function () {
-    const usuario = this.value.trim();
-    const regex = /^[a-zA-Z0-9@]+$/; 
-    const errorDiv = document.getElementById("error-usuario");
-    const errores = [];
-
-    errorDiv.innerHTML = '';
-
-    if (!usuario || usuario.length < 5 || usuario.length > 30 || !regex.test(usuario)) {
-        errores.push("El nombre de usuario debe tener entre 5 a 30 caracteres y solo puede contener letras, números y arroba.");
-    }
-
-    if (errores.length > 0) {
-        errores.forEach(error => {
-            const errorItem = document.createElement("div");
-            errorItem.style.color = "red";
-            errorItem.innerHTML = error;
-            errorDiv.appendChild(errorItem);
-        });
-    }
-});
-
-document.getElementById("contrasenia").addEventListener("input", function () {
-    const contrasenia = this.value.trim();
-    const regex = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/; 
-    const errorDiv = document.getElementById("error-contrasenia");
-    const errores = [];
-
-    errorDiv.innerHTML = '';
-
-    if (!contrasenia || contrasenia.length < 5 || contrasenia.length > 15 || !regex.test(contrasenia)) {
-        errores.push("La contraseña debe tener de 5 a 15 caracteres y no contener espacios.");
-    }
-
-    if (errores.length > 0) {
-        errores.forEach(error => {
-            const errorItem = document.createElement("div");
-            errorItem.style.color = "red";
-            errorItem.innerHTML = error;
-            errorDiv.appendChild(errorItem);
-        });
-    }
-});
-
-
-document.getElementById("btn-agregar").addEventListener("click", function (event) {
-    const nombreError = document.getElementById("error-nombre").innerHTML;
-    const apellidosError = document.getElementById("error-apellidos").innerHTML;
-    const telefonoError = document.getElementById("error-telefono").innerHTML;
-    const usuarioError = document.getElementById("error-usuario").innerHTML;
-    const contraseniaError = document.getElementById("error-contrasenia").innerHTML;
-
-    if (nombreError || apellidosError || telefonoError || usuarioError || contraseniaError) {
-        event.preventDefault();  // Evitar el envío
-        alert("Hay errores en el formulario. Corrígelos antes de continuar.");
-    }
-});

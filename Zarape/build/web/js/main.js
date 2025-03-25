@@ -73,31 +73,40 @@ function loadInicio() {
 
 function cargarServicioEmpleado() {
     fetch('modulos/moduloEmpleado/vistaEmpleado.html')
-            .then(response=>response.text())
-            .then(html=>{
-                document.getElementById("maincontent").innerHTML=html;
-                import("../modulos/moduloEmpleado/controladorEmpleado.js").then(
-                        function(controller){
-                            controladorGra1=controller;
-                            window.loadEmpleado = controller.loadEmpleado;
-                            window.loadEstados = controller.loadEstados;
-                            window.loadCiudades = controller.loadCiudades;
-                            window.SelectSucursales = controller.SelectSucursales;
-                            
-                            loadEmpleado();
-                            loadEstados();
-                            loadCiudades();
-                            SelectSucursales();
-                        });
-                const existingLink = document.querySelector('link[href="inicio/css-inicio.css"]');
-                if (existingLink) {
-                    existingLink.remove();
-                }
-                const link = document.createElement("link");
-                link.rel = "stylesheet";
-                link.href="modulos/css-modulos.css";
-                document.head.appendChild(link);
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("maincontent").innerHTML = html;
+            
+            // Limpiar el script anterior si existe
+            const oldScript = document.querySelector('script[src*="controladorEmpleado"]');
+            if (oldScript) oldScript.remove();
+
+            import("../modulos/moduloEmpleado/controladorEmpleado.js").then(controller => {
+                controladorGra1 = controller;
+                window.loadEmpleado = controller.loadEmpleado;
+                window.loadEstados = controller.loadEstados;
+                window.loadCiudades = controller.loadCiudades;
+                window.SelectSucursales = controller.SelectSucursales;
+                
+                // Inicializar validaciones
+                controller.inicializarValidaciones();
+                
+                // Cargar datos
+                loadEmpleado();
+                loadEstados();
+                loadCiudades();
+                SelectSucursales();
             });
+
+            const existingLink = document.querySelector('link[href="inicio/css-inicio.css"]');
+            if (existingLink) {
+                existingLink.remove();
+            }
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href="modulos/css-modulos.css";
+            document.head.appendChild(link);
+        });
 }
 
 function cargarServicioSucursal() {
@@ -129,28 +138,38 @@ function cargarServicioSucursal() {
 
 function cargarServicioCliente() {
     fetch('modulos/moduloCliente/vistaCliente.html')
-            .then(response=>response.text())
-            .then(html=>{
-                document.getElementById("maincontent").innerHTML=html;
-                import("../modulos/moduloCliente/controladorCliente.js").then(
-                        function(controller){
-                            controladorGra1=controller;
-                            window.loadCliente = controller.loadCliente;
-                            window.loadEstados = controller.loadEstados;
-                            window.loadCiudades = controller.loadCiudades;
-                            loadCliente();
-                            loadEstados();
-                            loadCiudades();
-                        });
-                const existingLink = document.querySelector('link[href="inicio/css-inicio.css"]');
-                if (existingLink) {
-                    existingLink.remove();
-                }
-                const link = document.createElement("link");
-                link.rel = "stylesheet";
-                link.href="modulos/css-modulos.css";
-                document.head.appendChild(link);
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("maincontent").innerHTML = html;
+            
+            // Limpiar el script anterior si existe
+            const oldScript = document.querySelector('script[src*="controladorCliente"]');
+            if (oldScript) oldScript.remove();
+
+            import("../modulos/moduloCliente/controladorCliente.js").then(controller => {
+                controladorGra1 = controller;
+                window.loadCliente = controller.loadCliente;
+                window.loadEstados = controller.loadEstados;
+                window.loadCiudades = controller.loadCiudades;
+                
+                // Inicializar validaciones
+                controller.inicializarValidaciones();
+                
+                // Cargar datos
+                loadCliente();
+                loadEstados();
+                loadCiudades();
             });
+
+            const existingLink = document.querySelector('link[href="inicio/css-inicio.css"]');
+            if (existingLink) {
+                existingLink.remove();
+            }
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href="modulos/css-modulos.css";
+            document.head.appendChild(link);
+        });
 }
 
 function cargarServicioBebida() {

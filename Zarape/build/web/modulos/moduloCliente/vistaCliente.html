@@ -43,30 +43,32 @@
     <form id="form-agregar">
       <div class="row mb-2">
         <div class="col-md-6 col-sm-12">
-          <input type="text" id="idCliente" class="form-control" placeholder="ID Cliente" disabled />
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <input type="text" id="nombre" class="form-control" placeholder="Nombre" />
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" class="form-control" placeholder="Ej: Juan (solo letras, sin acentos)" />
           <div id="error-nombre"></div>
         </div>
       </div>
       <div class="row mb-2">
         <div class="col-md-6 col-sm-12">
-          <input type="text" id="apellidos" class="form-control" placeholder="Apellidos" />
+          <label for="apellidos">Apellidos</label>
+          <input type="text" id="apellidos" class="form-control" placeholder="Ej: Pérez López (solo letras, sin acentos)" />
           <div id="error-apellidos"></div>
         </div>
         <div class="col-md-6 col-sm-12">
-          <input type="tel" id="telefono" class="form-control" placeholder="Teléfono" />
+          <label for="telefono">Teléfono</label>
+          <input type="tel" id="telefono" class="form-control" placeholder="Ej: 5512345678 (10 dígitos exactos)" />
           <div id="error-telefono"></div>
         </div>
       </div>
       <div class="row mb-2">
         <div class="col-md-6 col-sm-12">
+          <label for="estados">Estado</label>
           <select id="estados" class="form-control" onchange="controladorGra1.loadCiudades();">
             <!-- Opciones de estados se cargarán aquí -->
           </select>
         </div>
         <div class="col-md-6 col-sm-12">
+          <label for="ciudades">Ciudad</label>
           <select id="ciudades" class="form-control">
             <!-- Opciones de ciudades se cargarán aquí -->
           </select>
@@ -74,17 +76,19 @@
       </div>
       <div class="row mb-2">
         <div class="col-md-6 col-sm-12">
-          <input type="text" id="usuario" class="form-control" placeholder="Nombre Usuario" />
+          <label for="usuario">Nombre de Usuario</label>
+          <input type="text" id="usuario" class="form-control" placeholder="Ej: usuario@ (debe incluir @, 5-30 caracteres)" />
           <div id="error-usuario"></div>
         </div>
         <div class="col-md-6 col-sm-12">
-          <input type="password" id="contrasenia" class="form-control" placeholder="Contraseña" />
+          <label for="contrasenia">Contraseña</label>
+          <input type="password" id="contrasenia" class="form-control" placeholder="Ej: Pass@123 (8-15 caracteres, mayúscula, número y especial)" />
           <div id="error-contrasenia"></div>
         </div>
       </div>
       <div class="row mb-2">
       </div>
-      <button type="button" class="btn w-20 mb-2" style="background-color: #D00303; color: white; font-weight: bold" onclick="controladorGra1.agregarCliente();">Guardar</button>
+      <button id="btn-guardar" type="button" class="btn w-20 mb-2" style="background-color: #D00303; color: white; font-weight: bold" onclick="controladorGra1.agregarCliente();">Guardar</button>
       <button id="btn-eliminar" type="button" class="btn w-20 mb-2" style="background-color: #FA4032; color: white; font-weight: bold" onclick="controladorGra1.eliminarCliente();">Eliminar</button>
       <button type="button" class="btn w-20 mb-2" style="background-color: #FAAF08; color: white; font-weight: bold" onclick="controladorGra1.cancelarFormulario()">Cancelar</button>
     </form>
@@ -128,6 +132,3 @@
             content.classList.toggle("active-main");
         });
     </script>
-
-
-
