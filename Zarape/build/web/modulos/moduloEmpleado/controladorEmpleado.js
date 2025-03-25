@@ -1,136 +1,237 @@
 let listEmpleado = [];
-let listEstados =[];
+let listEstados = [];
 let listCiudades = [];
-let listSucursales =[];
+let listSucursales = [];
 
-export function loadCiudades() {
-    let v_edo = document.getElementById("estados").value;
-    let v_ciudades = document.getElementById("ciudades");
+let idPersona = null;
+let idUsuario = null;
+let validacionesInicializadas = false;
+
+// Función para cerrar sesión
+export function cerrarSesion() {
+    const nombreUsuario = localStorage.getItem('nombreUsuario');
+    if (!nombreUsuario) return;
+
+    const url = new URL('http://localhost:8080/Zarape/api/login/cerrarsesion');
+    url.search = new URLSearchParams({ 'nombre': nombreUsuario });
+
+    fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    })
+        .then(response => response.ok ? response.json() : Promise.reject('Error al cerrar sesión'))
+        .finally(() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('nombreUsuario');
+            alert("Cerrando sesión");
+            loadLogin();
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Función para inicializar todas las validaciones
+export function inicializarValidaciones() {
+    if (validacionesInicializadas) return;
     
-    while (v_ciudades.options.length >= 1) {
-        v_ciudades.remove(v_ciudades.options.length - 1);
-    }
-    
-    listCiudades.forEach(ciudad => {
-        if (ciudad.estado.idEstado == v_edo) {
-            let option = document.createElement("option");
-            option.value = ciudad.idCiudad;
-            option.text = ciudad.nombre;
-            v_ciudades.appendChild(option);
+    console.log("Inicializando validaciones para empleado...");
+
+    // Validación del nombre
+    document.getElementById("nombre")?.addEventListener("input", function () {
+        validarCampo(
+            this,
+            /^[a-zA-Z]+(?: [a-zA-Z]+)*$/,
+            1,
+            45,
+            document.getElementById("error-nombre"),
+            "El nombre debe contener solo letras, sin acentos, y un espacio entre palabra."
+        );
+    });
+
+    // Validación de los apellidos
+    document.getElementById("apellidos")?.addEventListener("input", function () {
+        validarCampo(
+            this,
+            /^[a-zA-Z]+(?: [a-zA-Z]+)*$/,
+            1,
+            45,
+            document.getElementById("error-apellidos"),
+            "Los apellidos deben contener solo letras, sin acentos, y un espacio entre palabras."
+        );
+    });
+
+    // Validación del teléfono
+    document.getElementById("telefono")?.addEventListener("input", function () {
+        validarCampo(
+            this,
+            /^\d{10}$/,
+            10,
+            10,
+            document.getElementById("error-telefono"),
+            "El teléfono debe contener exactamente 10 dígitos numéricos sin espacios."
+        );
+    });
+
+    // Validación del usuario
+    document.getElementById("usuario")?.addEventListener("input", function () {
+        validarCampo(
+            this,
+            /^[a-zA-Z@]{5,30}$/,
+            5,
+            30,
+            document.getElementById("error-usuario"),
+            "El nombre de usuario debe tener entre 5 y 30 caracteres y solo puede contener letras y el símbolo @."
+        );
+    });
+
+    // Validación de la contraseña
+    document.getElementById("contrasenia")?.addEventListener("input", function () {
+        validarCampo(
+            this,
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$_-])[A-Za-z\d@#$_-]{8,15}$/,
+            8,
+            15,
+            document.getElementById("error-contrasenia"),
+            "La contraseña debe tener entre 8 y 15 caracteres, incluir al menos una mayúscula, una minúscula, un número y un carácter especial (@, #, $, -, _)."
+        );
+    });
+
+    // Validar formulario antes de enviar
+    document.getElementById("btn-agregar")?.addEventListener("click", function (event) {
+        const errores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div");
+        if (errores.length > 0) {
+            event.preventDefault();
+            alert("Hay errores en el formulario. Corrígelos antes de continuar.");
         }
     });
+
+    validacionesInicializadas = true;
 }
 
+// Función para cargar las ciudades basadas en el estado seleccionado
+export function loadCiudades() {
+    const v_edo = document.getElementById("estados")?.value;
+    const v_ciudades = document.getElementById("ciudades");
+    
+    if (!v_edo || !v_ciudades) return;
+
+    v_ciudades.innerHTML = '';
+
+    const ciudadesFiltradas = listCiudades.filter(ciudad => ciudad.estado.idEstado == v_edo);
+    ciudadesFiltradas.forEach(ciudad => {
+        const option = document.createElement("option");
+        option.value = ciudad.idCiudad;
+        option.text = ciudad.nombre;
+        v_ciudades.appendChild(option);
+    });
+}
+
+// Cargar ciudades desde el servidor
 fetch('http://localhost:8080/Zarape/api/ciudad/getAllCiudades')
-    .then(response => response.json())
+    .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
     .then(city => {
-        console.log(city);
         listCiudades = city;
         loadCiudades();
-    });
+    })
+    .catch(error => console.error("Error al cargar las ciudades:", error));
 
-document.getElementById("estados").addEventListener('change', function() {
-    loadCiudades();
-});
-
+// Función para cargar los estados
 export function loadEstados() {
-    let v_estados = document.getElementById("estados");
-    listEstados.forEach(
-            estado=>{
-                let v_option = document.createElement("option");
-                v_option.value = estado.idEstado;
-                v_option.text = estado.nombre;
-                v_estados.appendChild(v_option);
-            }
-            );
+    const v_estados = document.getElementById("estados");
+    if (!v_estados) return;
+    
+    v_estados.innerHTML = '';
+    listEstados.forEach(estado => {
+        const option = document.createElement("option");
+        option.value = estado.idEstado;
+        option.text = estado.nombre;
+        v_estados.appendChild(option);
+    });
 }
 
+// Cargar estados desde el servidor
 fetch('http://localhost:8080/Zarape/api/datos/getAllEstados')
-        .then(response=> response.json())
-        .then(
-            datos=>{
-                console.log(datos);
-                listEstados=datos;
-                loadEstados();
-            }
-        );
+    .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
+    .then(datos => {
+        listEstados = datos;
+        loadEstados();
+    })
+    .catch(error => console.error("Error al cargar los estados:", error));
 
+// Función para cargar las sucursales
 export function SelectSucursales() {
-    let v_sucursales = document.getElementById("sucursales");
-    listSucursales.forEach(
-            sucursal=>{
-                let v_option = document.createElement("option");
-                v_option.value = sucursal.idSucursal;
-                v_option.text = sucursal.nombre;
-                v_sucursales.appendChild(v_option);
-            }
-            );
+    const v_sucursales = document.getElementById("sucursales");
+    if (!v_sucursales) return;
+    
+    v_sucursales.innerHTML = '';
+    listSucursales.forEach(sucursal => {
+        const option = document.createElement("option");
+        option.value = sucursal.idSucursal;
+        option.text = sucursal.nombre;
+        v_sucursales.appendChild(option);
+    });
 }
 
+// Cargar sucursales desde el servidor
 fetch('http://localhost:8080/Zarape/api/sucursales/getAllSucursales')
-        .then(response=> response.json())
-        .then(
-            datos=>{
-                console.log(datos);
-                listSucursales=datos;
-                    SelectSucursales();
-            }
-        );
+    .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
+    .then(datos => {
+        listSucursales = datos;
+        SelectSucursales();
+    })
+    .catch(error => console.error("Error al cargar las sucursales:", error));
 
-function toggleDropdown() {
-    document.getElementById("myDropdown").classList.toggle("show");
-}
-
+// Función para mostrar/ocultar el formulario
 export function mostrarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
     const btnGuardar = document.getElementById("btn-agregar");
-    btnGuardar.classList.add("d-none");
-    formularioContenedor.classList.remove("d-none"); // Muestra el formulario
+    
+    if (formularioContenedor && btnGuardar) {
+        btnGuardar.classList.add("d-none");
+        formularioContenedor.classList.remove("d-none");
+    }
 }
 
+// Función para cancelar el formulario
 export function cancelarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
     const btnGuardar = document.getElementById("btn-agregar");
-    btnGuardar.classList.remove("d-none");
-    formularioContenedor.classList.add("d-none"); // Oculta el formulario
-    limpiar();
-    limpiarMensajesError();
-}
-
-export function loadEmpleado(){
-    controladorGra1.mostrarInactivos();
+    
+    if (formularioContenedor && btnGuardar) {
+        btnGuardar.classList.remove("d-none");
+        formularioContenedor.classList.add("d-none");
     }
     
+    limpiar();
+    limpiarMensajesError();
+    validacionesInicializadas = false;
+}
+
+// Función para cargar los empleados
+export function loadEmpleado() {
     fetch('http://localhost:8080/Zarape/api/empleado/getAllEmpleados')
-        .then(response=>response.json())
-        .then(
-        registro=>{
-            console.log(registro);
-            listEmpleado=registro;
-            loadEmpleado();
-        });
+        .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
+        .then(registro => {
+            listEmpleado = registro;
+            mostrarInactivos();
+        })
+        .catch(error => console.error("Error al cargar los empleados:", error));
+}
 
+// Función para agregar un empleado
+export function agregarEmpleado() {
+    const errores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div");
+    if (errores.length > 0) {
+        alert("Hay errores en el formulario. Corrígelos antes de continuar.");
+        return;
+    }
 
- export function agregarEmpleado() {
-    let v_id = document.getElementById("idEmpleado").value || -1;  
-    let v_idPersona = idPersona || -1;
-    let v_idUsuario = idUsuario || -1;
-    let v_nombre = document.getElementById("nombre").value;
-    let v_apellidos = document.getElementById("apellidos").value;
-    let v_telefono = document.getElementById("telefono").value;
-    let v_ciudad = document.getElementById("ciudades").value;
-    let v_estado = document.getElementById("estados").value;
-    let v_user = document.getElementById("usuario").value;
-    let v_contrasenia = document.getElementById("contrasenia").value;
-    let v_sucursal = document.getElementById("sucursales").value;
-
-    let empleado = {
-        idEmpleado: parseInt(v_id),
-        activo: 1,  
+    const empleado = {
+        idEmpleado: -1,
+        activo: 1,
         sucursal: {
-            idSucursal: parseInt(v_sucursal),
-            activo: 1,  
-            nombre: "",  
+            idSucursal: parseInt(document.getElementById("sucursales").value),
+            activo: 1,
+            nombre: "",
             latitud: "",
             longitud: "",
             foto: "",
@@ -140,317 +241,162 @@ export function loadEmpleado(){
             numCalle: "",
             colonia: "",
             ciudad: {
-                idCiudad:parseInt(v_ciudad),
-                nombre: "", 
+                idCiudad: parseInt(document.getElementById("ciudades").value),
+                nombre: "",
                 estado: {
-                    idEstado: parseInt(v_estado),  
-                    nombre: "" 
+                    idEstado: parseInt(document.getElementById("estados").value),
+                    nombre: ""
                 }
             }
         },
         persona: {
-            idPersona: v_idPersona,  
-            nombre: v_nombre,
-            apellidos: v_apellidos,
-            telefono: v_telefono,
+            idPersona: idPersona || -1,
+            nombre: document.getElementById("nombre").value,
+            apellidos: document.getElementById("apellidos").value,
+            telefono: document.getElementById("telefono").value,
             ciudad: {
-                idCiudad: v_ciudad,
-                nombre: "",  
+                idCiudad: document.getElementById("ciudades").value,
+                nombre: "",
                 estado: {
-                    idEstado: v_estado,  
-                    nombre: "" 
+                    idEstado: document.getElementById("estados").value,
+                    nombre: ""
                 }
             }
         },
         usuario: {
-            idUsuario: v_idUsuario,  
+            idUsuario: idUsuario || -1,
             activo: 1,
-            nombre: v_user,
-            contrasenia: v_contrasenia
+            nombre: document.getElementById("usuario").value,
+            contrasenia: document.getElementById("contrasenia").value
         }
     };
 
-    let datos_servidor = { datosEmpleado: JSON.stringify(empleado) };
-    let parametro = new URLSearchParams(datos_servidor);
+    const parametro = new URLSearchParams({ datosEmpleado: JSON.stringify(empleado) });
 
-    let registro = {
+    fetch('http://localhost:8080/Zarape/api/empleado/agregar', {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: parametro
-    };
-    fetch('http://localhost:8080/Zarape/api/empleado/agregar', registro)
-        .then(response => response.json())
-        .then(json => {
-            console.log(json);
-            fetch('http://localhost:8080/Zarape/api/empleado/getAllEmpleados')
-            .then(response => response.json())
-            .then(
-                registro => {
-                    listEmpleado = registro;
-                    loadEmpleado();
-                }
-            );
     })
-        .catch(error => console.error("Error al agregar el empleado:", error));
-        limpiar();
-        cancelarFormulario();
-        limpiarMensajesError();
+        .then(response => response.ok ? response.json() : Promise.reject('Error al agregar'))
+        .then(() => loadEmpleado())
+        .catch(error => console.error("Error al agregar el empleado:", error))
+        .finally(() => {
+            limpiar();
+            cancelarFormulario();
+        });
 }
 
+// Función para eliminar un empleado
 export function eliminarEmpleado() {
-    let v_id = document.getElementById("idEmpleado").value;
-    let datos_servidor = { idEmpleado: v_id };
-    let parametro = new URLSearchParams(datos_servidor);
+    if (!idPersona) {
+        alert("No hay ningún empleado seleccionado para eliminar");
+        return;
+    }
 
-    let registro = {
+    if (!confirm("¿Estás seguro de que deseas eliminar este empleado?")) return;
+
+    const empleadoAEliminar = listEmpleado.find(emp => emp.persona.idPersona === idPersona);
+    if (!empleadoAEliminar) {
+        alert("No se encontró el empleado a eliminar");
+        return;
+    }
+
+    const parametro = new URLSearchParams({ idEmpleado: empleadoAEliminar.idEmpleado });
+
+    fetch('http://localhost:8080/Zarape/api/empleado/eliminar', {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: parametro
-    };
-
-    fetch('http://localhost:8080/Zarape/api/empleado/eliminar', registro)
-        .then(response => response.json())
-        .then(json => {
-            console.log(json);
-
-            fetch('http://localhost:8080/Zarape/api/empleado/getAllEmpleados')
-                .then(response => response.json())
-                .then(registro => {
-                    listEmpleado = registro;
-                    mostrarInactivos();
-                })
-                .catch(error => console.error("Error al obtener la lista de empleados:", error));
-        })
-        .catch(error => console.error("Error al eliminar el empleado:", error));
-
-    limpiar(); 
-    cancelarFormulario(); 
-    limpiarMensajesError();
+    })
+        .then(response => response.ok ? response.json() : Promise.reject('Error al eliminar'))
+        .then(() => loadEmpleado())
+        .catch(error => console.error("Error al eliminar el empleado:", error))
+        .finally(() => {
+            limpiar();
+            cancelarFormulario();
+        });
 }
 
-
-let idPersona = null;
-let idUsuario = null;
+// Función para seleccionar un registro
 export function selectRegistro(indice) {
-    document.getElementById("idEmpleado").value = listEmpleado[indice].idEmpleado;
-    document.getElementById("nombre").value = listEmpleado[indice].persona.nombre;
-    document.getElementById("apellidos").value = listEmpleado[indice].persona.apellidos;
-    document.getElementById("telefono").value = listEmpleado[indice].persona.telefono;
-    document.getElementById("estados").value = listEmpleado[indice].persona.ciudad.estado.idEstado;
+    if (indice < 0 || indice >= listEmpleado.length) return;
 
-    document.getElementById("ciudades").value = listEmpleado[indice].persona.ciudad.idCiudad;
-
-    document.getElementById("usuario").value = listEmpleado[indice].usuario.nombre;
-    document.getElementById("contrasenia").value = "";
-    document.getElementById("sucursales").value = listEmpleado[indice].sucursal.idSucursal;
-
-    idPersona = listEmpleado[indice].persona.idPersona;
-    idUsuario = listEmpleado[indice].usuario.idUsuario;
-
+    const empleado = listEmpleado[indice];
+    document.getElementById("nombre").value = empleado.persona.nombre;
+    document.getElementById("apellidos").value = empleado.persona.apellidos;
+    document.getElementById("telefono").value = empleado.persona.telefono;
+    document.getElementById("estados").value = empleado.persona.ciudad.estado.idEstado;
+    document.getElementById("usuario").value = empleado.usuario.nombre;
+    document.getElementById("contrasenia").value = empleado.usuario.contrasenia;
+    document.getElementById("sucursales").value = empleado.sucursal.idSucursal;
+    
+    idPersona = empleado.persona.idPersona;
+    idUsuario = empleado.usuario.idUsuario;
+    
     mostrarFormulario();
-
     loadCiudades();
-
+    
     setTimeout(() => {
-        let ciudadSelect = document.getElementById("ciudades");
-        ciudadSelect.value = listEmpleado[indice].persona.ciudad.idCiudad;
-    }, 10);
+        document.getElementById("ciudades").value = empleado.persona.ciudad.idCiudad;
+    }, 100);
 }
 
+// Función para limpiar el formulario
 export function limpiar() {
-    document.getElementById("idEmpleado").value = null;
-    document.getElementById("nombre").value = "";
-    document.getElementById("apellidos").value = "";
-    document.getElementById("telefono").value = "";
-    document.getElementById("estados").value = null;;
-    document.getElementById("ciudades").value = null;
-    document.getElementById("usuario").value = "";
-    document.getElementById("contrasenia").value = "";
+    ["nombre", "apellidos", "telefono", "estados", "ciudades", "usuario", "contrasenia", "sucursales"].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.value = "";
+    });
+    idPersona = null;
+    idUsuario = null;
 }
 
+// Función para limpiar mensajes de error
+export function limpiarMensajesError() {
+    document.querySelectorAll('[id^="error-"]').forEach(error => error.innerHTML = '');
+}
+
+// Función para mostrar empleados activos/inactivos
 export function mostrarInactivos() {
+    const mostrarActivos = document.getElementById("activos")?.checked;
+    const table = document.getElementById("renglones");
+    if (!table) return;
+
+    let renglon = listEmpleado
+        .filter(registro => mostrarActivos ? registro.activo === 1 : registro.activo === 0)
+        .map((registro, index) => `
+            <tr onclick='controladorGra1.selectRegistro(${index});'>
+                <td>${registro.persona.nombre}</td>
+                <td>${registro.persona.apellidos}</td>
+                <td>${registro.persona.telefono}</td>
+                <td>${registro.persona.ciudad.nombre}</td>
+                <td>${registro.persona.ciudad.estado.nombre}</td>
+                <td>${registro.usuario.nombre}</td>
+                <td>**********</td>
+                <td>${registro.sucursal.nombre}</td>
+            </tr>
+        `).join('');
+
+    table.innerHTML = renglon;
+    
     const btnGuardar = document.getElementById("btn-agregar");
     const btnEliminar = document.getElementById("btn-eliminar");
-    let mostrarActivos = document.getElementById("activos").checked;
-    let table = document.getElementById("renglones");
-        let renglon = "";
-        listEmpleado.forEach(registro=>{
-            if (mostrarActivos && registro.activo === 1) {
-                renglon+="<tr onclick='controladorGra1.selectRegistro("+listEmpleado.indexOf(registro)+");'><td>"+registro.persona.nombre+
-                    "</td><td>"+registro.persona.apellidos+
-                    "</td><td>"+registro.persona.telefono+
-                    "</td><td>"+registro.persona.ciudad.nombre+
-                    "</td><td>"+registro.persona.ciudad.estado.nombre+
-                    "</td><td>"+registro.usuario.nombre+
-                    "</td><td>"+"********"+
-                    "</td><td>"+registro.sucursal.nombre+
-                    "</td><tr>";
-                btnGuardar.classList.remove("d-none");
-                btnEliminar.classList.remove("d-none");
-            } else if (!mostrarActivos && registro.activo === 0) {
-                renglon+="<tr onclick='controladorGra1.selectRegistro("+listEmpleado.indexOf(registro)+");'><td>"+registro.persona.nombre+
-                    "</td><td>"+registro.persona.apellidos+
-                    "</td><td>"+registro.persona.telefono+
-                    "</td><td>"+registro.persona.ciudad.nombre+
-                    "</td><td>"+registro.persona.ciudad.estado.nombre+
-                    "</td><td>"+registro.usuario.nombre+
-                    "</td><td>"+"********"+
-                    "</td><td>"+registro.sucursal.nombre+
-                    "</td><tr>";
-                btnGuardar.classList.add("d-none");
-                btnEliminar.classList.add("d-none");
-            }
-        });
-        table.innerHTML=renglon;
-    
+    if (btnGuardar) btnGuardar.classList.toggle("d-none", !mostrarActivos);
+    if (btnEliminar) btnEliminar.classList.toggle("d-none", !mostrarActivos);
 }
 
-//Validaciones
+// Función genérica para validar campos
+function validarCampo(input, regex, minLength, maxLength, errorDiv, mensajeError) {
+    if (!input || !errorDiv) return;
 
-function limpiarMensajesError() {
-    const errores = document.querySelectorAll('[id^="error-"]');
-    errores.forEach(error => error.innerHTML = '');
+    const valor = input.value.trim();
+    errorDiv.innerHTML = '';
+
+    if (!valor || valor.length < minLength || valor.length > maxLength || !regex.test(valor)) {
+        const errorItem = document.createElement("div");
+        errorItem.style.color = "red";
+        errorItem.innerHTML = mensajeError;
+        errorDiv.appendChild(errorItem);
+    }
 }
-
-// Validación para el campo "nombre"
-document.getElementById("nombre").addEventListener("input", function () {
-    const nombre = this.value.trim();
-    const regex = /^[a-zA-Z]+(?: [a-zA-Z]+)*$/;  // Solo letras y un espacio entre palabras
-    const errorDiv = document.getElementById("error-nombre");
-    const errores = [];
-
-    // Limpiar mensajes de error anteriores
-    errorDiv.innerHTML = '';
-
-    if (!nombre || nombre.length < 1 || nombre.length > 45 || !regex.test(nombre)) {
-        errores.push("El nombre debe contener solo letras, sin acentos, un espacio entre palabras, y tener entre 1 y 45 caracteres.");
-    }
-
-    // Mostrar errores
-    if (errores.length > 0) {
-        errores.forEach(error => {
-            const errorItem = document.createElement("div");
-            errorItem.style.color = "red";
-            errorItem.innerHTML = error;
-            errorDiv.appendChild(errorItem);
-        });
-    }
-});
-
-// Validación para el campo "apellidos"
-document.getElementById("apellidos").addEventListener("input", function () {
-    const apellidos = this.value.trim();
-    const regex = /^[a-zA-Z]+(?: [a-zA-Z]+)*$/;  // Solo letras y espacios
-    const errorDiv = document.getElementById("error-apellidos");
-    const errores = [];
-
-    // Limpiar mensajes de error anteriores
-    errorDiv.innerHTML = '';
-
-    if (!apellidos || apellidos.length < 1 || apellidos.length > 45 || !regex.test(apellidos)) {
-        errores.push("Los apellidos debe contener solo letras, sin acentos, un espacio entre palabras, y tener entre 1 y 45 caracteres.");
-    }
-
-    // Mostrar errores
-    if (errores.length > 0) {
-        errores.forEach(error => {
-            const errorItem = document.createElement("div");
-            errorItem.style.color = "red";
-            errorItem.innerHTML = error;
-            errorDiv.appendChild(errorItem);
-        });
-    }
-});
-
-// Validación para el campo "telefono"
-document.getElementById("telefono").addEventListener("input", function () {
-    const telefono = this.value.trim();
-    const regex = /^\d{10}$/;  // Solo números, exactamente 10 dígitos
-    const errorDiv = document.getElementById("error-telefono");
-    const errores = [];
-
-    // Limpiar mensajes de error anteriores
-    errorDiv.innerHTML = '';
-
-    if (!telefono || !regex.test(telefono)) {
-        errores.push("El teléfono debe contener exactamente 10 dígitos numéricos sin espacios.");
-    }
-
-    // Mostrar errores
-    if (errores.length > 0) {
-        errores.forEach(error => {
-            const errorItem = document.createElement("div");
-            errorItem.style.color = "red";
-            errorItem.innerHTML = error;
-            errorDiv.appendChild(errorItem);
-        });
-    }
-});
-
-// Validación para el campo "usuario"
-document.getElementById("usuario").addEventListener("input", function () {
-    const usuario = this.value.trim();
-    const regex = /^[a-zA-Z0-9@]+$/; 
-    const errorDiv = document.getElementById("error-usuario");
-    const errores = [];
-
-    // Limpiar mensajes de error anteriores
-    errorDiv.innerHTML = '';
-
-    if (!usuario || usuario.length < 5 || usuario.length > 30 || !regex.test(usuario)) {
-        errores.push("El nombre de usuario debe tener entre 5 a 30 caracteres y solo puede contener letras, números y arroba.");
-    }
-
-    // Mostrar errores
-    if (errores.length > 0) {
-        errores.forEach(error => {
-            const errorItem = document.createElement("div");
-            errorItem.style.color = "red";
-            errorItem.innerHTML = error;
-            errorDiv.appendChild(errorItem);
-        });
-    }
-});
-
-// Validación para el campo "contrasenia"
-document.getElementById("contrasenia").addEventListener("input", function () {
-    const contrasenia = this.value.trim();
-    const regex = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/; // Solo letras, números y caracteres especiales permitidos
-    const errorDiv = document.getElementById("error-contrasenia");
-    const errores = [];
-
-    // Limpiar mensajes de error anteriores
-    errorDiv.innerHTML = '';
-
-    // Validación de longitud y caracteres permitidos
-    if (!contrasenia || contrasenia.length < 5 || contrasenia.length > 15 || !regex.test(contrasenia)) {
-        errores.push("La contraseña debe tener de 5 a 15 caracteres y no contener espacios.");
-    }
-
-    // Mostrar errores
-    if (errores.length > 0) {
-        errores.forEach(error => {
-            const errorItem = document.createElement("div");
-            errorItem.style.color = "red";
-            errorItem.innerHTML = error;
-            errorDiv.appendChild(errorItem);
-        });
-    }
-});
-
-
-// Prevenir el envío del formulario si hay errores
-document.getElementById("btn-agregar").addEventListener("click", function (event) {
-    // Validación de todos los campos
-    const nombreError = document.getElementById("error-nombre").innerHTML;
-    const apellidosError = document.getElementById("error-apellidos").innerHTML;
-    const telefonoError = document.getElementById("error-telefono").innerHTML;
-    const usuarioError = document.getElementById("error-usuario").innerHTML;
-    const contraseniaError = document.getElementById("error-contrasenia").innerHTML;
-
-    // Si hay algún mensaje de error, prevenimos el envío del formulario
-    if (nombreError || apellidosError || telefonoError || usuarioError || contraseniaError) {
-        event.preventDefault();  // Evitar el envío
-        alert("Hay errores en el formulario. Corrígelos antes de continuar.");
-    }
-});
