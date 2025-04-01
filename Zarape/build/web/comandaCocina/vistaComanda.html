@@ -13,14 +13,15 @@
         }
         
         body {
-            background-color: #f5f5f5;
+            background-color: #FFF8E1; /* Fondo amarillo claro */
             padding: 20px;
         }
         
         h1 {
             text-align: center;
             margin-bottom: 30px;
-            color: #333;
+            color: #E65100; /* Naranja oscuro */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
         
         .cards-container {
@@ -33,25 +34,26 @@
         }
         
         .card {
-            background-color: white;
+            background-color: #FFF3E0; /* Naranja muy claro */
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             width: 300px;
             transition: transform 0.3s ease;
             position: relative;
+            border: 1px solid #FFB74D; /* Borde naranja claro */
         }
         
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 12px rgba(230, 81, 0, 0.2); /* Sombra naranja */
         }
         
         .card-img {
             width: 100%;
             height: 150px;
             object-fit: cover;
-            background-color: #eee;
+            background: linear-gradient(45deg, #FFB74D, #FF9800); /* Degradado naranja */
         }
         
         .card-content {
@@ -61,11 +63,11 @@
         .card-title {
             font-size: 1.2rem;
             margin-bottom: 10px;
-            color: #222;
+            color: #BF360C; /* Naranja oscuro */
         }
         
         .card-description {
-            color: #666;
+            color: #5D4037; /* Marrón oscuro para contraste */
             margin-bottom: 10px;
             line-height: 1.5;
             font-size: 0.9rem;
@@ -73,7 +75,7 @@
         
         .card-details {
             margin-top: 10px;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #FFCC80; /* Naranja claro */
             padding-top: 10px;
         }
         
@@ -82,6 +84,7 @@
             justify-content: space-between;
             margin-bottom: 5px;
             font-size: 0.85rem;
+            color: #5D4037; /* Marrón oscuro */
         }
         
         /* Estilos para los spinners de estado */
@@ -96,27 +99,32 @@
             color: white;
             text-transform: uppercase;
             letter-spacing: 1px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .status-1 { /* En proceso */
-            background-color: #8B4513; /* Café */
+            background-color: #945034; /* Ámbar oscuro */
             animation: pulse 2s infinite;
         }
         
         .status-2 { /* Terminado */
-            background-color: #2ecc71; /* Verde */
+            background-color: #99BC85; /* Ámbar */
         }
         
         .status-3 { /* Entregado */
-            background-color: #3498db; /* Azul */
+            background-color: #57B4BA; /* Naranja intenso */
         }
         
         .status-4 { /* Cancelado */
-            background-color: #333; /* Gris oscuro */
+            background-color: #5C7285; /* Naranja oscuro */
             text-decoration: line-through;
         }
         
-
+        @keyframes pulse {
+            0% { opacity: 0.9; }
+            50% { opacity: 0.6; }
+            100% { opacity: 0.9; }
+        }
         
         /* Selector de estado */
         .status-selector {
@@ -124,41 +132,49 @@
             width: 100%;
             padding: 8px;
             border-radius: 5px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
+            border: 1px solid #FFB74D; /* Naranja claro */
+            background-color: #FFF3E0; /* Naranja muy claro */
             cursor: pointer;
+            color: #5D4037; /* Marrón oscuro */
         }
         
         .status-selector:focus {
             outline: none;
-            border-color: #3498db;
+            border-color: #E65100; /* Naranja oscuro */
         }
         
         .save-btn {
             display: block;
             width: 100%;
-            background-color: #3498db;
+            background: linear-gradient(to right, #FF9800, #FB8C00); /* Degradado naranja */
             color: white;
             padding: 10px;
             border-radius: 5px;
             text-decoration: none;
             font-weight: bold;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
             margin-top: 15px;
             border: none;
             cursor: pointer;
             text-align: center;
+            box-shadow: 0 2px 4px rgba(230, 81, 0, 0.3);
         }
         
         .save-btn:hover {
-            background-color: #2980b9;
+            background: linear-gradient(to right, #FB8C00, #F57C00); /* Degradado naranja más oscuro */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(230, 81, 0, 0.3);
+        }
+        
+        .save-btn:active {
+            transform: translateY(0);
         }
         
         .loading {
             text-align: center;
             padding: 20px;
             font-style: italic;
-            color: #666;
+            color: #E65100; /* Naranja oscuro */
         }
         
         @media (max-width: 768px) {
@@ -265,7 +281,6 @@
                     <div class="card-content">
                         <h2 class="card-title">Comanda #${comanda.idComanda}</h2>
                         <p class="card-description">Fecha: ${fechaFormateada}</p>
-                        <p class="card-description">Ticket: ${ticket.ticket || 'N/A'}</p>
                         
                         <div class="card-details" id="details-${comanda.idComanda}">
                             <div class="loading">Cargando detalles...</div>
@@ -296,53 +311,53 @@
             });
         }
 
-    // Cargar detalles de un ticket
-    async function loadDetails(idTicket, idComanda) {
-    const detailsContainer = document.getElementById(`details-${idComanda}`);
-    if (!detailsContainer) return;
-    
-    try {
-        const response = await fetch(`http://localhost:8080/Zarape/api/comanda/getDetails?idTicket=${idTicket}`);
-        
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
-        }
-        
-        const detalles = await response.json();
-        
-        if (!Array.isArray(detalles)) {
-            throw new Error('Formato de respuesta inválido');
-        }
-        
-        if (detalles.length === 0) {
-            detailsContainer.innerHTML = '<p>No hay detalles disponibles</p>';
-            return;
-        }
-        
-        let html = '<h3>Detalles:</h3>';
-        detalles.forEach(detalle => {
-            // Usar el nombre del producto si está disponible
-            let productoDesc = detalle.nombreProducto || 
-                             (detalle.idCombo ? `Combo ${detalle.idCombo}` : 
-                             (detalle.idProducto ? `Producto ${detalle.idProducto}` : 'Ítem no identificado'));
+        // Cargar detalles de un ticket
+        async function loadDetails(idTicket, idComanda) {
+            const detailsContainer = document.getElementById(`details-${idComanda}`);
+            if (!detailsContainer) return;
             
-            html += `
-                <div class="detail-item">
-                    <span>${detalle.cantidad || 0} x ${productoDesc}</span>
-                    <span>$${(detalle.precio || 0).toFixed(2)}</span>
-                </div>
-            `;
-        });
-        
-        detailsContainer.innerHTML = html;
-    } catch (error) {
-        console.error('Error al cargar detalles:', error);
-        detailsContainer.innerHTML = `
-            <p style="color: red;">Error al cargar detalles:</p>
-            <p>${error.message}</p>
-        `;
-    }
-}
+            try {
+                const response = await fetch(`http://localhost:8080/Zarape/api/comanda/getDetails?idTicket=${idTicket}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const detalles = await response.json();
+                
+                if (!Array.isArray(detalles)) {
+                    throw new Error('Formato de respuesta inválido');
+                }
+                
+                if (detalles.length === 0) {
+                    detailsContainer.innerHTML = '<p>No hay detalles disponibles</p>';
+                    return;
+                }
+                
+                let html = '<h3 style="color: #E65100;">Detalles:</h3>';
+                detalles.forEach(detalle => {
+                    // Usar el nombre del producto si está disponible
+                    let productoDesc = detalle.nombreProducto || 
+                                    (detalle.idCombo ? `Combo ${detalle.idCombo}` : 
+                                    (detalle.idProducto ? `Producto ${detalle.idProducto}` : 'Ítem no identificado'));
+                    
+                    html += `
+                        <div class="detail-item">
+                            <span>${detalle.cantidad || 0} x ${productoDesc}</span>
+                            <span>$${(detalle.precio || 0).toFixed(2)}</span>
+                        </div>
+                    `;
+                });
+                
+                detailsContainer.innerHTML = html;
+            } catch (error) {
+                console.error('Error al cargar detalles:', error);
+                detailsContainer.innerHTML = `
+                    <p style="color: #D84315;">Error al cargar detalles:</p>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
 
         // Manejar cambio de estatus (visual)
         function handleStatusChange(select, idComanda) {
