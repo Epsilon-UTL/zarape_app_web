@@ -24,47 +24,4 @@ import org.utl.dsm403.zarape.model.Comanda;
 @Path("comanda")
 public class RESTComanda {
 
-    @POST
-    @Path("agregarComanda")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response agregar(@FormParam("datosComanda") @DefaultValue("") String datosComanda) {
-        String out = "";
-        Comanda c = null;
-        ControllerComanda ctrl = null;
-        Gson gson = new Gson();
-
-        try {
-            if (datosComanda == null || datosComanda.isEmpty()) {
-                out = "{\"error\":\"Datos de la comanda no proporcionados\"}";
-                return Response.status(Response.Status.BAD_REQUEST).entity(out).build();
-            }
-
-            c = gson.fromJson(datosComanda, Comanda.class);
-
-            if (c == null) {
-                throw new JsonSyntaxException("Formato de datos no válido");
-            }
-
-            ctrl = new ControllerComanda();
-            c = ctrl.addComanda(c);
-
-            out = gson.toJson(c);
-            return Response.status(Response.Status.OK).entity(out).build();
-
-        } catch (JsonSyntaxException jpe) {
-            out = "{\"error\":\"Formato de datos no válido: " + jpe.getMessage() + "\"}";
-            jpe.printStackTrace();
-            return Response.status(Response.Status.BAD_REQUEST).entity(out).build();
-
-        } catch (SQLException e) {
-            out = "{\"error\":\"Error al agregar la comanda en la base de datos: " + e.getMessage() + "\"}";
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(out).build();
-
-        } catch (Exception ex) {
-            out = "{\"error\":\"Error interno del servidor. Intente más tarde. Detalles: " + ex.getMessage() + "\"}";
-            ex.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(out).build();
-        }
-    }
 }

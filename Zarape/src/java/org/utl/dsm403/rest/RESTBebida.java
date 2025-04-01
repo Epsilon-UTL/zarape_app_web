@@ -1,14 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package org.utl.dsm403.rest;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -18,16 +16,22 @@ import java.sql.SQLException;
 import java.util.List;
 import org.utl.dsm403.zarape.control.ControllerBebida;
 import org.utl.dsm403.zarape.model.Bebida;
-/**
- *
- * @author rodri
- */
+
 @Path("bebida")
 public class RESTBebida {
+    private static final String ERROR_UNAUTHORIZED = "{\"error\":\"Acceso no autorizado\"}";
+    private static final String ERROR_INTERNAL_SERVER = "{\"error\":\"Error interno del servidor. Intente mas tarde.\"}";
+    private static final String ERROR_INVALID_DATA = "{\"error\":\"Formato de datos no valido\"}";
+
+    private final ControllerBebida controllerBebida = new ControllerBebida();
      @Path("getAllBebida")
     @Produces(MediaType. APPLICATION_JSON)
     @GET
-    public Response getAllBebida() throws SQLException
+    public Response getAllBebida(@HeaderParam("username") String username) throws SQLException{
+            if (username == null || !controllerBebida.validarToken(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(ERROR_UNAUTHORIZED).build();
+        }
+    
     {
         String out = null;
         
@@ -44,11 +48,17 @@ public class RESTBebida {
         }
         return Response.status(Response.Status.OK).entity(out).build();
     }
-    
+}
+
     @Path("agregarBebida")
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response actualizar(@FormParam("datosBebida") @DefaultValue("") String bebida ) {
+    public Response actualizar(@HeaderParam("username") String username,
+            @FormParam("datosBebida") @DefaultValue("") String bebida ) throws SQLException{
+        if (username == null || !controllerBebida.validarToken(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(ERROR_UNAUTHORIZED).build();
+        }
+        
         String out = "";
         Bebida b= null;
         ControllerBebida ctrl = null;
@@ -81,7 +91,12 @@ public class RESTBebida {
     @Path("eliminarBebida")
     @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response eliminar(@FormParam("idProducto") @DefaultValue("0") int idBebida ) throws SQLException {
+    public Response eliminar(@HeaderParam("username") String username,
+            @FormParam("idProducto") @DefaultValue("0") int idBebida ) throws SQLException {
+        if (username == null || !controllerBebida.validarToken(username)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity(ERROR_UNAUTHORIZED).build();
+        }
+        
         String out = null;
         ControllerBebida ctrl = null;
         try {
@@ -105,5 +120,4 @@ public class RESTBebida {
         }
         return Response.status(Response.Status.OK).entity(out).build();
     }
-    
 }

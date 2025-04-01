@@ -46,7 +46,21 @@ public class ControllerBebida {
 
         return b;
     }
+    
+    public boolean validarToken(String nombreUsuario) throws SQLException {
+    String sql = "SELECT 1 FROM usuario WHERE nombre = ? AND lastToken IS NOT NULL"; 
+    ConexionMySQL objConMySQL = new ConexionMySQL();
 
+        try (Connection conn = objConMySQL.open()) {
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, nombreUsuario);
+        ResultSet rs = pstmt.executeQuery();
+        return rs.next(); 
+        } catch (SQLException ex) {
+        ex.printStackTrace();
+        return false;
+        }
+    }
     
         public Bebida update(Bebida b) throws SQLException {
         String sql = "{CALL actualizar_producto(?,?,?,?,?,?)};";

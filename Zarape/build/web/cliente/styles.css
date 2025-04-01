@@ -6,13 +6,18 @@
     --navbar-dark-secondary: #FA812F; /* grapefruit */
     --navbar-light-primary: #FEF3E2; /* off white */
     --navbar-light-secondary: #FAAF08; /* citrus */
+    --card-color: white; /* amarillo para las tarjetas */
+    --button-color: #FF9800; /* naranja para los botones */
+    --text-color: #000000; /* negro para el texto */
+    --border-color: #FAAF08; /* amarillo para bordes */
 }
 
 html, body {
     height: 100%;
     margin: 0;
     scrollbar-width: none;
-    background-color: var(--background); /* Usar el color de fondo definido */
+    background-color: var(--background);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .contenedor-principal {
@@ -21,8 +26,8 @@ html, body {
 }
 
 .barra-lateral {
-    width: var(--navbar-width); /* Usar el ancho de la barra lateral definido */
-    background-color: var(--navbar-dark-primary); /* Usar el color primario oscuro */
+    width: var(--navbar-width);
+    background-color: var(--navbar-dark-primary);
     color: white;
     padding: 1rem;
     overflow-y: auto;
@@ -32,13 +37,13 @@ html, body {
     flex-grow: 1;
     padding: 1rem;
     overflow-y: auto;
-    background-color: var(--navbar-light-primary); /* Usar el color primario claro */
+    background-color: var(--navbar-light-primary);
 }
 
 .sidebar {
-    width: var(--navbar-width); /* Usar el ancho de la barra lateral definido */
-    background-color: var(--navbar-dark-secondary); /* Usar el color secundario oscuro */
-    color: white;
+    width: var(--navbar-width);
+    background-color: var(--navbar-dark-secondary);
+    color: black;
     padding: 15px;
     display: flex;
     flex-direction: column;
@@ -49,23 +54,87 @@ html, body {
 }
 
 .sidebar h4 {
-    border-bottom: 2px solid var(--navbar-light-secondary); /* Usar el color secundario claro */
+    border-bottom: 2px solid var(--navbar-light-secondary);
     padding-bottom: 10px;
     margin-bottom: 20px;
     font-size: 1.5rem;
+    color: white;
 }
 
+/* Estilos para los items del pedido */
+#pedidos-lista .nav-item {
+    background-color: white !important;
+    border-left: 4px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+    padding: 12px 15px !important;
+    margin-bottom: 10px !important;
+    border-radius: 5px !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+    transition: transform 0.2s ease;
+}
+
+#pedidos-lista .nav-item:hover {
+    transform: translateY(-2px);
+}
+
+/* Estilo para la información del producto */
+.producto-info {
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-color) !important;
+}
+
+/* Estilo para los botones */
+.btn-group .btn {
+    min-width: 30px;
+    text-align: center;
+}
+
+#pedidos-lista .btn-outline-light {
+    background-color: var(--navbar-dark-secondary) !important;
+    color: white !important;
+    border: none !important;
+    padding: 5px 10px !important;
+    border-radius: 4px !important;
+    transition: all 0.3s ease !important;
+}
+
+#pedidos-lista .btn-outline-light:hover {
+    background-color: var(--navbar-dark-primary) !important;
+    transform: scale(1.05);
+}
+
+/* Estilos para los totales */
+#totales {
+    padding-top: 15px;
+    border-top: 2px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+}
+
+#totales .fw-bold {
+    color: white !important;
+    font-size: 1.1rem;
+}
+
+#subtotal, #iva, #total {
+    color: white !important;
+    font-weight: bold;
+}
+
+/* Estilos para las tarjetas de productos */
 .card {
     border-radius: 15px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s, box-shadow 0.2s;
     margin-bottom: 20px;
     background-color: white;
+    border: none;
 }
 
 .card:hover {
     transform: scale(1.03);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .card img {
@@ -82,48 +151,27 @@ html, body {
     font-size: 1.25rem;
     font-weight: bold;
     margin-bottom: 10px;
+    color: var(--text-color);
 }
 
 .card-text {
     font-size: 1rem;
-    color: #555;
+    color: var(--text-color);
 }
 
 .btn-primary {
-    background-color: var(--navbar-dark-primary); /* Usar el color primario oscuro */
+    background-color: var(--navbar-dark-primary);
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
     font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-    background-color: var(--navbar-dark-secondary); /* Usar el color secundario oscuro */
-}
-
-.nav-item {
-    background-color: rgba(255, 255, 255, 0.6);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    transition: background-color 0.2s;
-}
-
-.nav-item:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.btn-outline-light {
-    border: 1px solid var(--navbar-light-secondary); /* Usar el color secundario claro */
-    color: var(--navbar-light-secondary); /* Usar el color secundario claro */
-    padding: 5px 10px;
-    border-radius: 5px;
-    transition: background-color 0.2s, color 0.2s;
-}
-
-.btn-outline-light:hover {
-    background-color: var(--navbar-light-secondary); /* Usar el color secundario claro */
-    color: black;
+    background-color: #FBA518;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .producto-card {
@@ -152,21 +200,17 @@ html, body {
     scrollbar-width: none;
 }
 
-#totales {
-    padding-top: 10px;
-    border-top: 2px solid white;
-    background: rgba(0, 0, 0, 0.1); /* Fondo semitransparente opcional */
-}
-
-/* Estilos adicionales para el modal */
+/* Estilos para los modales */
 .modal-content {
     border-radius: 15px;
+    border: none;
 }
 
 .modal-header {
-    background-color: var(--navbar-dark-primary); /* Usar el color primario oscuro */
+    background-color: var(--navbar-dark-primary);
     color: white;
     border-radius: 15px 15px 0 0;
+    border-bottom: none;
 }
 
 .modal-title {
@@ -177,33 +221,52 @@ html, body {
     border-radius: 10px;
     max-height: 300px;
     object-fit: cover;
+    margin-bottom: 15px;
 }
 
 .modal-footer {
+    border-top: none;
     border-radius: 0 0 15px 15px;
 }
 
-.text-end {
-    text-align: left !important;
-}
-
+/* Textos generales */
 h3 {
     color: var(--navbar-dark-primary);
     font-weight: bold;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 hr {
     border-top: 2px solid var(--navbar-dark-secondary);
     opacity: 1;
+    margin: 1.5rem 0;
 }
 
-.g-3 {
-    gap: 20px;
+/* Efectos de hover para botones secundarios */
+.btn-danger {
+    transition: all 0.3s ease;
 }
 
-.badge {
-    font-size: 0.9rem;
-    padding: 5px 10px;
-    border-radius: 8px;
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Ajustes para dispositivos móviles */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    
+    .contenedor-principal {
+        flex-direction: column;
+    }
+    
+    #pedidos-container {
+        max-height: 300px;
+    }
 }

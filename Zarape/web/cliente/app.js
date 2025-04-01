@@ -293,86 +293,115 @@ function mostrarModalPago() {
 
 function realizarPago() {
     const tipoPago = document.getElementById('pagoTipo').value;
-    let mensaje = "";
-    const pagoModal = new bootstrap.Modal(document.getElementById('pagoModal'));
+    const pagoModal = bootstrap.Modal.getInstance(document.getElementById('pagoModal'));
+    const confirmacionModal = new bootstrap.Modal(document.getElementById('confirmacionModal'));
 
+    // Validación de método de pago (tu lógica original)
     if (tipoPago === "tarjeta") {
         const numeroTarjeta = document.getElementById('tarjetaNumero').value;
         if (!numeroTarjeta) {
-            mensaje = "Por favor, ingresa un número de tarjeta válido.";
-        } else {
-            mensaje = `Pago realizado con tarjeta terminada en ${numeroTarjeta.slice(-4)}. ¡Pago exitoso!`;
-            const modal = bootstrap.Modal.getInstance(document.getElementById('pagoModal'));
-            modal.hide();
-
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-            cancelarPedido();
-
+            document.getElementById('pagoMensaje').innerText = "Por favor, ingresa un número de tarjeta válido.";
+            return;
         }
-    } else if (tipoPago === "paypal") {
+    } 
+    else if (tipoPago === "paypal") {
         const correoPaypal = document.getElementById('paypalCorreo').value;
         if (!correoPaypal) {
-            mensaje = "Por favor, ingresa un correo de PayPal válido.";
-        } else {
-            mensaje = `Pago realizado con PayPal. ¡Pago exitoso!`;
-            const modal = bootstrap.Modal.getInstance(document.getElementById('pagoModal'));
-            modal.hide();
-
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
-            cancelarPedido();
+            document.getElementById('pagoMensaje').innerText = "Por favor, ingresa un correo de PayPal válido.";
+            return;
         }
-    } else if (tipoPago === "efectivo") {
-        mensaje = "Pago realizado en efectivo. ¡Pago exitoso!";
-        const modal = bootstrap.Modal.getInstance(document.getElementById('pagoModal'));
-        modal.hide();
-
-        setTimeout(() => {
-            window.location.reload();
-        }, 2000);
-        cancelarPedido();
-    } else {
-        mensaje = "Por favor, selecciona un método de pago.";
-    }
-
-    document.getElementById('pagoMensaje').innerText = mensaje;
-}
-
-
-function guardarComanda() {
-    if (pedidos.length === 0) {
-        alert("No hay pedidos para guardar.");
+    } 
+    else if (!tipoPago) {
+        document.getElementById('pagoMensaje').innerText = "Por favor, selecciona un método de pago.";
         return;
     }
 
-    const comandaData = {
-        idCliente: 1,
-        idSucursal: 1,
-        detalles: pedidos.map(pedido => ({
-            idProducto: pedido.idProducto,
-            cantidad: pedido.cantidad
-        }))
-    };
+    // Mostrar carga en el modal de pago
+    document.getElementById('pagoMensaje').innerHTML = '<div class="spinner-border" role="status"></div> Procesando...';
 
-    fetch(servidor + apiComanda, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(comandaData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Respuesta del servidor:", data);
-        alert("Comanda guardada correctamente con ID: " + data.ticket.idTicket);
-        
-        
-    })
-    .catch(error => {
-        console.error("Error al guardar la comanda:", error);
-        alert("Error al guardar la comanda. Intenta nuevamente.");
+    // Registrar el ticket
+    registrarTicket()
+        .then(data => {
+            // Cerrar modal de pago
+            pagoModal.hide();
+            
+            // Preparar mensaje de éxito
+            let mensajeExito = `
+                <div class="text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="text-success">¡Pago realizado con éxito!</h4>
+                    <p>Método de pago: <strong>${tipoPago.toUpperCase()}</strong></p>
+                    ${tipoPago === "tarjeta" ? `<p>Tarjeta terminada en: <strong>${document.getElementById('tarjetaNumero').value.slice(-4)}</strong></p>` : ''}
+                    ${tipoPago === "paypal" ? `<p>Correo PayPal: <strong>${document.getElementById('paypalCorreo').value}</strong></p>` : ''}
+                    <p class="mt-3">Número de ticket: <strong>${data.idComanda}</strong></p>
+                    <p>Total: <strong>${document.getElementById('resumenTotal').textContent}</strong></p>
+                </div>
+            `;
+            
+            // Mostrar en modal de confirmación
+            document.getElementById('confirmacionMensaje').innerHTML = mensajeExito;
+            confirmacionModal.show();
+            
+            // Limpiar pedido después de cerrar confirmación
+            confirmacionModal._element.addEventListener('hidden.bs.modal', () => {
+                cancelarPedido();
+            }, { once: true });
+        })
+        .catch(error => {
+            // Mostrar error en modal de confirmación
+            document.getElementById('confirmacionMensaje').innerHTML = `
+                <div class="text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-x-circle-fill text-danger" style="font-size: 3rem;"></i>
+                    </div>
+                    <h4 class="text-danger">Error en el proceso</h4>
+                    <p>${error.message}</p>
+                    <p>Por favor, intente nuevamente.</p>
+                </div>
+            `;
+            confirmacionModal.show();
+            
+            // Restablecer mensaje en modal de pago
+            document.getElementById('pagoMensaje').innerText = '';
+        });
+}
+
+// Función para registrar el ticket (estructura exacta que espera el servicio)
+function registrarTicket() {
+    return new Promise((resolve, reject) => {
+        if (pedidos.length === 0) {
+            reject(new Error("No hay productos en el pedido"));
+            return;
+        }
+
+        // Estructura EXACTA que espera el backend
+        const ticketData = {
+            ticket: {
+                idCliente: 1, // Reemplaza con tu lógica para obtener el ID real
+                idSucursal: 1 // Reemplaza con tu lógica para obtener la sucursal
+            },
+            detalles: pedidos.map(pedido => ({
+                idProducto: pedido.idProducto,
+                cantidad: pedido.cantidad
+            }))
+        };
+
+        fetch(servidor + 'ticket/registrar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `datos=${encodeURIComponent(JSON.stringify(ticketData))}`
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => resolve(data))
+        .catch(error => reject(error));
     });
 }

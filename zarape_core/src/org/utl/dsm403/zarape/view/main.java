@@ -45,7 +45,7 @@ public class main {
 //        eliminarBebida();
 //          mostrarUsuarios();
 //        insertarTicketTest();
-        insertarComanda();
+//        insertarComanda();
     }
     
 //    private static void add() throws SQLException
@@ -245,11 +245,11 @@ public static void mostrar() {
 //        System.out.println("Resultado de la inserción del ticket: " + resultado);
 //    }
 //    
-    private static void insertarComanda() throws SQLException{
-        ControllerComanda ctrlcomanda = new ControllerComanda();
-        Comanda comande = new Comanda();
-        Ticket ticket = new Ticket(1, "", "", "", 0, 0, 0);
-        comande.setTicket(ticket);
-        ctrlcomanda.addComanda(comande);
-    }
+//    private static void insertarComanda() throws SQLException{
+//        ControllerComanda ctrlcomanda = new ControllerComanda();
+//        Comanda comande = new Comanda();
+//        Ticket ticket = new Ticket(1, "", "", "", 0, 0, 0);
+//        comande.setTicket(ticket);
+//        ctrlcomanda.addComanda(comande);
+//    }
 }

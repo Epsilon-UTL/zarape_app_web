@@ -13,7 +13,7 @@ export function loadCategoriaBd() {
             );
 }
 
-fetch('http://localhost:8080/Zarape/api/categoria/getAllCategoriaBebidas')
+fetch('http://localhost:8080/zarape/api/categoria/getAllCategoriaBebidas')
         .then(response=> response.json())
         .then(
             datos=>{
@@ -39,10 +39,16 @@ export function cancelarFormulario() {
 }
 
 export function loadBebida(){
-        controladorGra1.mostrarInactivos();
+    mostrarInactivos();
     }
-    
-    fetch('http://localhost:8080/Zarape/api/bebida/getAllBebida')
+    const username=localStorage.getItem("nombreUsuario");
+    fetch('http://localhost:8080/zarape/api/bebida/getAllBebida',{
+        method:"GET",
+        headers:{
+            "username":username,
+            "Content-Type":"application/json"
+        }
+    })
         .then(response=>response.json())
         .then(
         registro=>{
@@ -51,7 +57,7 @@ export function loadBebida(){
             loadBebida();
         });
 
- export function agregarBebida() {
+export function agregarBebida() {
     let v_idBebida = document.getElementById("idBebida").value;
     let v_idProducto = idproducto || -1;
     let v_nombre = document.getElementById("nombre").value;
@@ -59,6 +65,7 @@ export function loadBebida(){
     let v_descripcion = document.getElementById("descripcion").value;
     let v_foto = document.getElementById("foto").value;
     let v_categoria = document.getElementById("categoria").value;
+
     let bebida = {
         "idBebida": v_idBebida || -1,
         "producto": {
@@ -71,35 +78,41 @@ export function loadBebida(){
                 "idCategoria": v_categoria,
                 "nombre": "",
                 "tipo": "B",
-                "activo": 0},
-            "activo": 0}
+                "activo": 0
+            },
+            "activo": 0
+        }
     };
 
     let datos_servidor = { datosBebida: JSON.stringify(bebida) };
     let parametro = new URLSearchParams(datos_servidor);
 
+    let username = localStorage.getItem("nombreUsuario");
+
     let registro = {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "username": username
+        },
         body: parametro
     };
-    fetch('http://localhost:8080/Zarape/api/bebida/agregarBebida', registro)
+
+    fetch('http://localhost:8080/zarape/api/bebida/agregarBebida', registro)
         .then(response => response.json())
         .then(json => {
             console.log(json);
-            fetch('http://localhost:8080/Zarape/api/bebida/getAllBebida')
-            .then(response => response.json())
-            .then(
-                registro => {
-                    listBebida = registro;
-                    loadBebida();
-                }
-            );
-    })
+            return fetch('http://localhost:8080/zarape/api/bebida/getAllBebida');
+        })
+        .then(response => response.json())
+        .then(registro => {
+            listBebida = registro;
+            loadBebida();
+        })
         .catch(error => console.error("Error al agregar la bebida:", error));
-//        limpiar();
-//        cancelarFormulario();
 }
+
+
 let idproducto = null;
 export function selectRegistro(indice) { 
     document.getElementById("idBebida").value = listBebida[indice].idBebida;
@@ -126,28 +139,33 @@ function cargarFotografia() {
     }
 }
 
-export function eliminarBebida()
-{
-    let v_idProducto = idproducto;
+export function eliminarBebida() {
+    let v_idProducto = idproducto;  // Asegúrate de que idproducto está definido
     let datos_servidor = { idProducto: v_idProducto };
     let parametro = new URLSearchParams(datos_servidor);
-        let registro = {
+
+    let registro = {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "username": localStorage.getItem("nombreUsuario") // Agregamos el username aquí
+        },
         body: parametro
     };
-    fetch('http://localhost:8080/Zarape/api/bebida/eliminarBebida', registro)
+
+    fetch('http://localhost:8080/zarape/api/bebida/eliminarBebida', registro)
         .then(response => response.json())
         .then(json => {
             console.log(json);
-    })
-        .catch(error => console.error("Error al agregar la bebida:", error));
-        limpiar();
-        cancelarFormulario();
-        mostrarInactivos();
+        })
+        .catch(error => console.error("Error al eliminar la bebida:", error));
+
+    limpiar();
+    cancelarFormulario();
+    mostrarInactivos();
 }
 
- export function limpiar() {
+export function limpiar() {
     document.getElementById("idBebida").value = "";
     document.getElementById("nombre").value = "";
     document.getElementById("precio").value = '';
@@ -193,4 +211,3 @@ function toggleDropdown() {
     limpiar();
     document.getElementById("myDropdown").classList.toggle("show");
 }
-

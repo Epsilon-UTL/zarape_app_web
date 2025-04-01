@@ -1,61 +1,83 @@
 package org.utl.dsm403.rest;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.sql.SQLException;
 import java.util.List;
 import org.utl.dsm403.zarape.control.ControllerTicket;
+import org.utl.dsm403.zarape.model.Comanda;
 import org.utl.dsm403.zarape.model.DetalleTicket;
 import org.utl.dsm403.zarape.model.Ticket;
-import com.google.gson.reflect.TypeToken;
-
-@Path("ticket") 
+import com.google.gson.JsonObject;
+import java.sql.SQLException;
+import java.util.Arrays;
+/**
+ *
+ * @author rodri
+ */
+@Path("ticket")
 public class RESTTicket {
-
-    private ControllerTicket ticketService = new ControllerTicket();
-    private Gson gson = new Gson();
-
-    @POST 
-    @Path("agregarTicket") 
+    
+    @Path("registrar")
+    @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response agregarTicket(@FormParam("datosTicket") String Ticket) {
+    public Response registrar(@FormParam("datos") @DefaultValue("") String jsonDatos) {
+        String out;
+        Gson gson = new Gson();
+
         try {
-            JsonObject request = gson.fromJson(Ticket, JsonObject.class);
-
-            int idCliente = request.get("idCliente").getAsInt();
-            int idSucursal = request.get("idSucursal").getAsInt();
-            JsonArray detallesJson = request.getAsJsonArray("detalles");
-
-            if (idCliente <= 0 || idSucursal <= 0 || detallesJson == null || detallesJson.size() == 0) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("{\"message\": \"Datos de entrada inválidos\"}")
-                        .build();
+            // Validar JSON no vacío
+            if (jsonDatos == null || jsonDatos.trim().isEmpty()) {
+                throw new IllegalArgumentException("Datos JSON requeridos");
             }
 
-            List<DetalleTicket> detalles = gson.fromJson(detallesJson, new TypeToken<List<DetalleTicket>>() {}.getType());
+            JsonObject jsonObject = gson.fromJson(jsonDatos, JsonObject.class);
 
-            Ticket ticket = new Ticket();
-            ticket.setIdCliente(idCliente);
-            ticket.setIdSucursal(idSucursal);
+            // Validar estructura
+            if (!jsonObject.has("ticket") || !jsonObject.has("detalles")) {
+                throw new IllegalArgumentException("Estructura JSON inválida. Se requieren 'ticket' y 'detalles'");
+            }
 
-            Ticket resultado = ticketService.insertarTicket(ticket, detalles);
+            // Parsear ticket
+            Ticket ticket = gson.fromJson(jsonObject.get("ticket"), Ticket.class);
 
-            return Response.ok(gson.toJson(resultado)).build();
+            // Parsear detalles
+            DetalleTicket[] detallesArray = gson.fromJson(
+                jsonObject.getAsJsonArray("detalles"), 
+                DetalleTicket[].class
+            );
+            List<DetalleTicket> detalles = Arrays.asList(detallesArray);
+
+            // Validar datos básicos
+            if (ticket.getIdCliente() <= 0 || ticket.getIdSucursal() <= 0) {
+                throw new IllegalArgumentException("ID de cliente y sucursal son requeridos");
+            }
+
+            // Procesar ticket
+            ControllerTicket controller = new ControllerTicket();
+            Comanda comanda = controller.registrarTicket(ticket, detalles);
+
+            out = gson.toJson(comanda);
+
+        } catch (JsonSyntaxException e) {
+            out = "{\"error\":\"Error en formato JSON: " + e.getMessage() + "\"}";
+        } catch (IllegalArgumentException e) {
+            out = "{\"error\":\"Datos inválidos: " + e.getMessage() + "\"}";
         } catch (SQLException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"message\": \"Error en la base de datos: " + e.getMessage() + "\"}")
-                    .build();
+            out = "{\"error\":\"Error en base de datos: " + e.getMessage() + "\"}";
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"message\": \"Error al procesar la solicitud: " + e.getMessage() + "\"}")
-                    .build();
+            out = "{\"error\":\"Error interno: " + e.getMessage() + "\"}";
         }
+
+        return Response.status(out.contains("\"error\"") ? 
+                           Response.Status.BAD_REQUEST : 
+                           Response.Status.OK)
+                      .entity(out).build();
     }
 }

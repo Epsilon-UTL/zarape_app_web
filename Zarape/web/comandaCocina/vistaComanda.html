@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Vista de Comandas</title>
+    <style>
+        .comanda {
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .encabezado {
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .detalle {
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .en-proceso { background-color: #8B4513; color: white; }
+        .terminado { background-color: #4CAF50; color: white; }
+        .entregado { background-color: #2196F3; color: white; }
+        .cancelado { background-color: #616161; color: white; }
+        .estado-badge {
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cola de Comandas</h1>
+    <div id="colaComandas"></div>
+
+    <script>
+        // Función para obtener comandas del servidor
+        function obtenerComandas() {
+            fetch('/api/comandas')
+                .then(response => response.json())
+                .then(data => actualizarVista(data))
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Función para actualizar el estado de una comanda
+        function actualizarEstado(folio, nuevoEstado) {
+            fetch(`/api/comandas/${folio}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ estado: nuevoEstado })
+            })
+            .then(response => {
+                if (response.ok) {
+                    obtenerComandas(); // Refrescar la vista
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Función para renderizar las comandas
+        function actualizarVista(comandas) {
+            const contenedor = document.getElementById('colaComandas');
+            contenedor.innerHTML = '';
+
+            comandas.forEach(comanda => {
+                const comandaDiv = document.createElement('div');
+                comandaDiv.className = 'comanda';
+
+                // Encabezado
+                const encabezadoDiv = document.createElement('div');
+                encabezadoDiv.className = 'encabezado';
+                
+                // Determinar clase CSS según estado
+                let estadoClass = '';
+                switch(comanda.estado) {
+                    case 'En proceso': estadoClass = 'en-proceso'; break;
+                    case 'Terminado': estadoClass = 'terminado'; break;
+                    case 'Entregado': estadoClass = 'entregado'; break;
+                    case 'Cancelado': estadoClass = 'cancelado'; break;
+                }
+
+                encabezadoDiv.innerHTML = `
+                    <div>
+                        <strong>Folio:</strong> ${comanda.folio} | 
+                        <strong>Fecha/Hora:</strong> ${new Date(comanda.fechaHoraRegistro).toLocaleString()}
+                    </div>
+                    <div>
+                        <span class="estado-badge ${estadoClass}">${comanda.estado}</span>
+                        ${comanda.estado === 'En proceso' ? 
+                            `<button onclick="actualizarEstado(${comanda.folio}, 'Terminado')">Terminar</button>
+                             <button onclick="actualizarEstado(${comanda.folio}, 'Cancelado')">Cancelar</button>` : 
+                         comanda.estado === 'Terminado' ? 
+                            `<button onclick="actualizarEstado(${comanda.folio}, 'Entregado')">Entregar</button>` : 
+                         ''}
+                    </div>
+                `;
+
+                // Detalle
+                const detalleDiv = document.createElement('div');
+                detalleDiv.className = 'detalle';
+                
+                let tablaDetalle = '<table><tr><th>Renglón</th><th>Descripción</th><th>Cantidad</th></tr>';
+                comanda.detalles.forEach(detalle => {
+                    tablaDetalle += `
+                        <tr>
+                            <td>${detalle.renglon}</td>
+                            <td>${detalle.descripcionProducto}</td>
+                            <td>${detalle.cantidad}</td>
+                        </tr>
+                    `;
+                });
+                tablaDetalle += '</table>';
+                detalleDiv.innerHTML = tablaDetalle;
+
+                // Ensamblar comanda
+                comandaDiv.appendChild(encabezadoDiv);
+                comandaDiv.appendChild(detalleDiv);
+                contenedor.appendChild(comandaDiv);
+            });
+        }
+
+        // Actualizar comandas cada 5 segundos
+        obtenerComandas();
+        setInterval(obtenerComandas, 5000);
+    </script>
+</body>
+</html>
