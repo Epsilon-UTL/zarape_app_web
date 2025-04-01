@@ -117,13 +117,7 @@ function cargarServicioSucursal() {
                 import("../modulos/moduloSucursal/controladorSucursal.js").then(
                         function(controller){
                             controladorGra1=controller;
-                            console.log(controladorGra1);
-                            window.loadSucursales = controller.loadSucursales;
-                            window.loadEstados = controller.loadEstados;
-                            window.loadCiudades = controller.loadCiudades;
-                            loadSucursales();
-                            loadEstados();
-                            loadCiudades();
+                            controller.loadInitialData();
                         });
                 const existingLink = document.querySelector('link[href="inicio/css-inicio.css"]');
                 if (existingLink) {

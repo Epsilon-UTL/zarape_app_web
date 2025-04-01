@@ -16,17 +16,16 @@ import org.utl.dsm403.zarape.model.Sucursal;
 
 @Path("sucursales")
 public class RESTSucursal {
-    
+
     @Path("getAllSucursales")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
-    
-    public Response getAllSucursales(){
+    public Response getAllSucursales() {
         String out = null;
-        
+
         List<Sucursal> sucursales = null;
         ControllerSucursal ce = new ControllerSucursal();
-        
+
         try {
             sucursales = ce.getAll();
             out = new Gson().toJson(sucursales);
@@ -39,105 +38,95 @@ public class RESTSucursal {
     }
 
     @Path("agregar")
-    @Produces (MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response agregar(@FormParam("datosSucursal") @DefaultValue("") String sucursal){
-     String out = null;
-     Sucursal s = null;
+    public Response agregar(@FormParam("datosSucursal") @DefaultValue("") String sucursal) {
+        String out = null;
+        Sucursal s = null;
         ControllerSucursal ctrl = null;
         Gson gson = new Gson();
-        
-        try{
+
+        try {
             s = gson.fromJson(sucursal, Sucursal.class);
             ctrl = new ControllerSucursal();
-            if(s.getIdSucursal()< 1)
-            {
+            if (s.getIdSucursal() < 1) {
                 s.setIdSucursal(ctrl.add(s).getIdSucursal());
+            } else {
+                s = ctrl.update(s);
             }
-            else{
-                s=ctrl.update(s);
-            }
-            out = gson.toJson(s);    
-        }catch(JsonParseException jpe)
-        {
+            out = gson.toJson(s);
+        } catch (JsonParseException jpe) {
             out = """
                   {"error":"Formato de datos no valido."}
                   """;
             jpe.printStackTrace();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             out = """
                   {"error":"Error interno del servidor. Intente mas tarde, PERSONA."}
                   """;
             ex.printStackTrace();
         }
         return Response.status(Response.Status.OK).entity(out).build();
-        
-        }
 
-    
+    }
+
     @Path("eliminar")
-    @Produces (MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response eliminar(@FormParam("idSucursal") @DefaultValue("0") int idSucursal){
+    public Response eliminar(@FormParam("idSucursal") @DefaultValue("0") int idSucursal) {
         String out = null;
-        
+
         ControllerSucursal ctrl = null;
-        
-        try{
+
+        try {
             ctrl = new ControllerSucursal();
             ctrl.delete(idSucursal);
-            
+
             out = """
                   {"resultado":"Sucursal %d eliminado."}
                   """;
-            out=String.format(out, idSucursal);
-        }catch(JsonParseException jpe){
+            out = String.format(out, idSucursal);
+        } catch (JsonParseException jpe) {
             out = """
                   {"error":"Formato de datos no valido."}
                   """;
-                  jpe.printStackTrace();
-        }
-        catch (Exception ex)
-        {
+            jpe.printStackTrace();
+        } catch (Exception ex) {
             out = """
                   {"error":"Error interno del servidor. Intente mas tarde, PERSONA."}
                   """;
             ex.printStackTrace();
         }
-    return Response.status(Response.Status.OK).entity(out).build();
+        return Response.status(Response.Status.OK).entity(out).build();
     }
-    
+
     @Path("activar")
-    @Produces (MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     @POST
-    public Response activar(@FormParam("idSucursal") @DefaultValue("1") int idSucursal){
+    public Response activar(@FormParam("idSucursal") @DefaultValue("1") int idSucursal) {
         String out = null;
-        
+
         ControllerSucursal ctrl = null;
-        
-        try{
+
+        try {
             ctrl = new ControllerSucursal();
             ctrl.activar(idSucursal);
-            
+
             out = """
                   {"resultado":"Empleado %d activado."}
                   """;
-            out=String.format(out, idSucursal);
-        }catch(JsonParseException jpe){
+            out = String.format(out, idSucursal);
+        } catch (JsonParseException jpe) {
             out = """
                   {"error":"Formato de datos no valido."}
                   """;
-                  jpe.printStackTrace();
-        }
-        catch (Exception ex)
-        {
+            jpe.printStackTrace();
+        } catch (Exception ex) {
             out = """
                   {"error":"Error interno del servidor. Intente mas tarde, PERSONA."}
                   """;
             ex.printStackTrace();
         }
-    return Response.status(Response.Status.OK).entity(out).build();
+        return Response.status(Response.Status.OK).entity(out).build();
     }
 }

@@ -1,265 +1,248 @@
 let listSucursales = [];
 let listCiudades = [];
-let listEstados =[];
+let listEstados = [];
 
-export function loadCiudades() {
-    let v_edo = document.getElementById("estados").value;
-    let v_ciudades = document.getElementById("Ciudades");
-    
-    while (v_ciudades.options.length >= 1) {
-        v_ciudades.remove(v_ciudades.options.length - 1);
+// URLs base para las APIs
+const API_BASE_URL = 'http://localhost:8080/Zarape/api';
+const ENDPOINTS = {
+    ciudades: '/ciudad/getAllCiudades',
+    estados: '/datos/getAllEstados',
+    sucursales: '/sucursales/getAllSucursales',
+    agregarSucursal: '/sucursales/agregar',
+    eliminarSucursal: '/sucursales/eliminar'
+};
+
+// Función genérica para hacer fetch requests
+async function fetchData(endpoint) {
+    try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.error(`Error fetching ${endpoint}:`, error);
+        return null;
     }
-    
-    listCiudades.forEach(ciudad => {
-        if (ciudad.estado.idEstado == v_edo) {
-            let option = document.createElement("option");
-            option.value = ciudad.idCiudad;
-            option.text = ciudad.nombre;
-            v_ciudades.appendChild(option);
+}
+
+// Cargar datos iniciales
+export async function loadInitialData() {
+    try {
+        showLoader();
+        const [ciudades, estados, sucursales] = await Promise.all([
+            fetchData(ENDPOINTS.ciudades),
+            fetchData(ENDPOINTS.estados),
+            fetchData(ENDPOINTS.sucursales)
+        ]);
+        
+        if (ciudades) {
+            listCiudades = ciudades;
+            loadCiudades();
         }
-    });
+
+        if (estados) {
+            listEstados = estados;
+            loadEstados();
+        }
+
+        if (sucursales) {
+            listSucursales = sucursales;
+            mostrarInactivos();
+        }
+    } catch (error) {
+        console.error("Error loading initial data:", error);
+    } finally {
+        console.log("Finalizado");
+        hideLoader();
+    }
 }
 
-fetch('http://localhost:8080/Zarape/api/ciudad/getAllCiudades')
-    .then(response => response.json())
-    .then(city => {
-        console.log(city);
-        listCiudades = city;
-        loadCiudades();
-    });
+// Cargar ciudades basado en estado seleccionado
+export function loadCiudades() {
+    const estadoId = document.getElementById("estados").value;
+    const ciudadesSelect = document.getElementById("Ciudades");
     
-export function loadEstados() {
-    let v_estados = document.getElementById("estados");
-    listEstados.forEach(
-            estado=>{
-                let v_option = document.createElement("option");
-                v_option.value = estado.idEstado;
-                v_option.text = estado.nombre;
-                v_estados.appendChild(v_option);
-            }
-            );
+    // Limpiar select
+    ciudadesSelect.innerHTML = '';
+    
+    // Filtrar y agregar ciudades
+    listCiudades
+        .filter(ciudad => ciudad.estado.idEstado == estadoId)
+        .forEach(ciudad => {
+            const option = document.createElement("option");
+            option.value = ciudad.idCiudad;
+            option.textContent = ciudad.nombre;
+            ciudadesSelect.appendChild(option);
+        });
 }
 
-fetch('http://localhost:8080/Zarape/api/datos/getAllEstados')
-        .then(response=> response.json())
-        .then(
-            datos=>{
-                console.log(datos);
-                listEstados=datos;
-                loadEstados();
-            }
-        );
+// Cargar estados en el select
+export function loadEstados() {
+    const estadosSelect = document.getElementById("estados");
+    estadosSelect.innerHTML = ''; // Limpiar primero
+    
+    listEstados.forEach(estado => {
+        const option = document.createElement("option");
+        option.value = estado.idEstado;
+        option.textContent = estado.nombre;
+        estadosSelect.appendChild(option);
+    });
+}
 
+// Mostrar/ocultar formulario
 export function mostrarFormulario() {
-    const formularioContenedor = document.getElementById("formulario-contenedor");
-    formularioContenedor.classList.remove("d-none"); // Muestra el formulario
+    document.getElementById("formulario-contenedor").classList.remove("d-none");
 }
 
 export function cancelarFormulario() {
-    const formularioContenedor = document.getElementById("formulario-contenedor");
-    formularioContenedor.classList.add("d-none"); // Oculta el formulario
-}
-export function loadSucursales(){
-    controladorGra1.mostrarInactivos();
-    }
-    
-    fetch('http://localhost:8080/Zarape/api/sucursales/getAllSucursales')
-        .then(response=>response.json())
-        .then(
-        registro=>{
-            console.log(registro);
-            listSucursales=registro;
-            loadSucursales();
-        });
-        
-export function mostrarInactivos() {
-    const btnGuardar = document.getElementById("btn-agregar");
-    const btnEliminar = document.getElementById("btn-eliminar");
-    let mostrarActivos = document.getElementById("activos").checked;
-    let table = document.getElementById("renglones");
-    let renglon = "";
-
-    listSucursales.forEach((registro, index) => {
-        if (mostrarActivos && registro.activo === 1) {
-            renglon += `
-                <tr onclick='controladorGra1.selectRegistro(${index});'>
-                    <td>${registro.nombre}</td>
-                    <td>${registro.latitud}</td>
-                    <td>${registro.longitud}</td>
-                    <td><img src="data:image/png;base64,${registro.foto || ''}" alt="Foto Sucursal" width="50"></td>
-                    <td>${registro.urlWeb}</td>
-                    <td>${registro.horario}</td>
-                    <td>${registro.calle}</td>
-                    <td>${registro.numCalle}</td>
-                    <td>${registro.colonia}</td>
-                    <td>${registro.Ciudad.nombre}</td>
-                </tr>
-            `;
-            btnGuardar.classList.remove("d-none");
-            btnEliminar.classList.remove("d-none");
-        } else if (!mostrarActivos && registro.activo === 0) {
-            renglon += `
-                <tr onclick='controladorGra1.selectRegistro(${index});'>
-                    <td>${registro.nombre}</td>
-                    <td>${registro.latitud}</td>
-                    <td>${registro.longitud}</td>
-                    <td><img src="data:image/png;base64,${registro.foto || ''}" alt="Foto Sucursal" width="50"></td>
-                    <td>${registro.urlWeb}</td>
-                    <td>${registro.horario}</td>
-                    <td>${registro.calle}</td>
-                    <td>${registro.numCalle}</td>
-                    <td>${registro.colonia}</td>
-                    <td>${registro.Ciudad.nombre}</td>
-                </tr>
-            `;
-            btnGuardar.classList.add("d-none");
-            btnEliminar.classList.add("d-none");
-        }
-    });
-
-    table.innerHTML = renglon;
-}
-
-
-function limpiar() {
-    document.getElementById("idSucursal").value = null;
-    document.getElementById("nombre").value = "";
-    document.getElementById("latitud").value = "";
-    document.getElementById("longitud").value = "";
-    document.getElementById("foto").value = "";
-    document.getElementById("urlWeb").value = "";
-    document.getElementById("horarios").value = "";
-    document.getElementById("calle").value = "";
-    document.getElementById("numCalle").value = "";
-    document.getElementById("colonia").value = "";
-    document.getElementById("Ciudades").value = "";
-}
-
-export function selectRegistro(indice) { 
-    document.getElementById("idSucursal").value = listSucursales[indice].idSucursal;
-    document.getElementById("nombre").value = listSucursales[indice].nombre;
-    document.getElementById("latitud").value = listSucursales[indice].latitud;
-    document.getElementById("longitud").value = listSucursales[indice].longitud;
-    document.getElementById("foto").value = listSucursales[indice].foto;
-    document.getElementById("urlWeb").value = listSucursales[indice].urlWeb;
-    document.getElementById("horarios").value = listSucursales[indice].horario;
-    document.getElementById("calle").value = listSucursales[indice].calle;
-    document.getElementById("numCalle").value = listSucursales[indice].numCalle;
-    document.getElementById("colonia").value = listSucursales[indice].colonia;
-    document.getElementById("Ciudades").value = listSucursales[indice].Ciudad.idCiudad;
-    
-    mostrarFormulario();
-    
-    document.getElementById("estados").value = listSucursales[indice].Ciudad.estado.idEstado;
-    mostrarFormulario();
-    setTimeout(() => {
-        let ciudadSelect = document.getElementById("Ciudades");
-        ciudadSelect.value = listSucursales[indice].Ciudad.idCiudad;
-    }, 10);
-    loadCiudades();
-}
-
-function toggleDropdown() {
     limpiar();
-    document.getElementById("myDropdown").classList.toggle("show");
+    document.getElementById("formulario-contenedor").classList.add("d-none");
 }
 
-function ocultarElementos() {
-    if (window.innerWidth <= 384) {
-        document.getElementById("barraLateral").classList.toggle("show");
-    }
+// Limpiar formulario
+function limpiar() {
+    const form = document.getElementById("form-agregar");
+    if (form) form.reset();
+    document.getElementById("idSucursal").value = "";
 }
 
-window.addEventListener('resize', ocultarElementos);
+// Mostrar sucursales activas/inactivas
+export function mostrarInactivos() {
+    const mostrarActivos = document.getElementById("activos").checked;
+    const tableBody = document.getElementById("renglones");
+    const btnAgregar = document.getElementById("btn-agregar");
+    const btnEliminar = document.getElementById("btn-eliminar");
 
-fetch('http://localhost:8080/Zarape/api/sucursales/getAllSucursales')
-    .then(response => response.json())
-    .then(datos => {
-        console.log(datos);
-        listSucursales = datos;
-        loadSucursales();
-    });
+    // Configurar visibilidad de botones
+    btnAgregar.classList.toggle("d-none", !mostrarActivos);
+    btnEliminar.classList.toggle("d-none", !mostrarActivos);
 
-export function agregarSucursal() {
-    let v_idSucursal = document.getElementById("idSucursal").value || -1;
-    let v_nombre = document.getElementById("nombre").value;
-    let v_latitud = document.getElementById("latitud").value;
-    let v_longitud = document.getElementById("longitud").value;
-    let v_foto = document.getElementById("foto").value; 
-    let v_urlWeb = document.getElementById("urlWeb").value;
-    let v_horario = document.getElementById("horarios").value;
-    let v_calle = document.getElementById("calle").value;
-    let v_numCalle = document.getElementById("numCalle").value;
-    let v_colonia = document.getElementById("colonia").value;
-    let v_ciudad = document.getElementById("Ciudades").value;
-    let sucursal = {
-        idSucursal: v_idSucursal,
-        nombre: v_nombre,
-        latitud: v_latitud,
-        longitud: v_longitud,
-        foto: v_foto,
-        urlWeb: v_urlWeb,
-        horario: v_horario,
-        calle: v_calle,
-        numCalle: v_numCalle,
-        colonia: v_colonia,
+    // Generar filas de la tabla
+    tableBody.innerHTML = listSucursales
+        .filter(registro => mostrarActivos ? registro.activo === 1 : registro.activo === 0)
+        .map((registro, index) => `
+            <tr ondblclick="controladorGra1.selectRegistro(${index})">
+                <td>${registro.nombre}</td>
+                <td>${registro.latitud}</td>
+                <td>${registro.longitud}</td>
+                <td><img src="data:image/png;base64,${registro.foto || ''}" alt="Foto" width="50"></td>
+                <td>${registro.urlWeb}</td>
+                <td>${registro.horario}</td>
+                <td>${registro.calle}</td>
+                <td>${registro.numCalle}</td>
+                <td>${registro.colonia}</td>
+                <td>${registro.Ciudad.nombre}</td>
+            </tr>
+        `).join('');
+}
+
+// Seleccionar registro con doble click
+export function selectRegistro(indice) {
+    const sucursal = listSucursales[indice];
+    if (!sucursal) return;
+
+    // Llenar formulario
+    document.getElementById("idSucursal").value = sucursal.idSucursal;
+    document.getElementById("nombre").value = sucursal.nombre;
+    document.getElementById("latitud").value = sucursal.latitud;
+    document.getElementById("longitud").value = sucursal.longitud;
+    document.getElementById("foto").value = sucursal.foto;
+    document.getElementById("urlWeb").value = sucursal.urlWeb;
+    document.getElementById("horarios").value = sucursal.horario;
+    document.getElementById("calle").value = sucursal.calle;
+    document.getElementById("numCalle").value = sucursal.numCalle;
+    document.getElementById("colonia").value = sucursal.colonia;
+    
+    // Seleccionar estado y ciudad
+    document.getElementById("estados").value = sucursal.Ciudad.estado.idEstado;
+    loadCiudades();
+    
+    // Timeout para asegurar que las ciudades se cargaron
+    setTimeout(() => {
+        document.getElementById("Ciudades").value = sucursal.Ciudad.idCiudad;
+    }, 100);
+    
+    mostrarFormulario();
+}
+
+// Agregar nueva sucursal
+export async function agregarSucursal() {
+    const formData = {
+        idSucursal: document.getElementById("idSucursal").value || -1,
+        nombre: document.getElementById("nombre").value,
+        latitud: document.getElementById("latitud").value,
+        longitud: document.getElementById("longitud").value,
+        foto: document.getElementById("foto").value,
+        urlWeb: document.getElementById("urlWeb").value,
+        horario: document.getElementById("horarios").value,
+        calle: document.getElementById("calle").value,
+        numCalle: document.getElementById("numCalle").value,
+        colonia: document.getElementById("colonia").value,
         activo: 1,
         Ciudad: {
-            idCiudad: v_ciudad,
+            idCiudad: document.getElementById("Ciudades").value,
             nombre: ""
-        }
-    };
-
-    let datos_servidor = { datosSucursal: JSON.stringify(sucursal) };
-    let parametro = new URLSearchParams(datos_servidor);
-
-    let registro = {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: parametro
+        }
     };
-    fetch('http://localhost:8080/Zarape/api/sucursales/agregar', registro)
-        .then(response => response.json())
-        .then(json => {
-            console.log(json);
-            fetch('http://localhost:8080/Zarape/api/sucursales/getAllSucursales')
-            .then(response => response.json())
-            .then(
-                registro => {
-                    listSucursales = registro;
-                    loadSucursales();
-                }
-            );
-    })
-        .catch(error => console.error("Error al agregar el Sucursal:", error));
-        limpiar();
+
+    try {
+        const response = await fetch(`${API_BASE_URL}${ENDPOINTS.agregarSucursal}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ datosSucursal: JSON.stringify(formData) })
+        });
+
+        if (!response.ok) throw new Error("Error al agregar sucursal");
+
+        const json = await response.json();
+        console.log("Success:", json);
+        
+        // Actualizar lista
+        const updatedList = await fetchData(ENDPOINTS.sucursales);
+        if (updatedList) {
+            listSucursales = updatedList;
+            mostrarInactivos();
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    } finally {
         cancelarFormulario();
+    }
 }
 
-export function eliminarSucursal()
-{
-    let v_idSucursal = document.getElementById("idSucursal").value;
-    let datos_servidor = { idSucursal: v_idSucursal };
-    let parametro = new URLSearchParams(datos_servidor);
-        let registro = {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: parametro
-    };
-    fetch('http://localhost:8080/Zarape/api/sucursales/eliminar', registro)
-        .then(response => response.json())
-        .then(json => {
-            console.log(json);
-    fetch('http://localhost:8080/Zarape/api/sucursales/getAllSucursales')
-                .then(response => response.json())
-                .then(registro => {
-                    listSucursales = registro;
-                    mostrarInactivos();
-                })
-                .catch(error => console.error("Error al obtener la lista de sucursales:", error));
-    })
-        .catch(error => console.error("Error al eliminar el sucursal:", error));
-        limpiar();
+// Eliminar sucursal
+export async function eliminarSucursal() {
+    const idSucursal = document.getElementById("idSucursal").value;
+    if (!idSucursal) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}${ENDPOINTS.eliminarSucursal}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ idSucursal })
+        });
+
+        if (!response.ok) throw new Error("Error al eliminar sucursal");
+
+        const json = await response.json();
+        console.log("Success:", json);
+        
+        // Actualizar lista
+        const updatedList = await fetchData(ENDPOINTS.sucursales);
+        if (updatedList) {
+            listSucursales = updatedList;
+            mostrarInactivos();
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    } finally {
         cancelarFormulario();
-        mostrarInactivos();
+    }
+}
+
+// Manejar redimensionamiento de ventana
+function handleResize() {
+    const barraLateral = document.getElementById("barraLateral");
+    if (barraLateral && window.innerWidth <= 384) {
+        barraLateral.classList.toggle("show");
+    }
 }

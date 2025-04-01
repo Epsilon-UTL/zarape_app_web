@@ -1,141 +1,141 @@
 <!DOCTYPE html>
 <div class="content">
 
-        <!-- Menú lateral -->
-        <div class="menu-lateral" id="menuLateral">
-            <button type="button" class="btn btn-block botonLateral mt-3" onclick="cargarServicioSucursal();">Sucursal</button>
-            <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioEmpleado();">Empleado</button>
-            <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioAlimento();">Alimento</button>
-            <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioBebida();">Bebida</button>
-            <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioCliente();">Cliente</button>
+    <!-- Menú lateral -->
+    <div class="menu-lateral" id="menuLateral">
+        <button type="button" class="btn btn-block botonLateral mt-2 p-1" onclick="cargarServicioSucursal();">Sucursal</button>
+        <button type="button" class="btn btn-block botonLateral p-1" onclick="cargarServicioEmpleado();">Empleado</button>
+        <button type="button" class="btn btn-block botonLateral p-1" onclick="cargarServicioAlimento();">Alimento</button>
+        <button type="button" class="btn btn-block botonLateral p-1" onclick="cargarServicioBebida();">Bebida</button>
+        <button type="button" class="btn btn-block botonLateral p-1" onclick="cargarServicioCliente();">Cliente</button>
 
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" role="switch" id="activos" checked onchange="controladorGra1.mostrarInactivos()"/>
-                <label class="form-check-label" for="activos">Activos</label>
-            </div>
-                <i class="fa-solid fa-house fa-2xl" onclick="loadInicio();"></i><br>
-                <span>Inicio</span>
-                <i class="fas fa-power-off fa-2xl mt-3" onclick="cerrarSesion();"></i><br>
-                <span>Cerrar Sesión</span>
+        <div class="form-check form-switch mt-2 ps-0">
+            <input class="form-check-input ms-0" type="checkbox" role="switch" id="activos" checked onchange="controladorGra1.mostrarInactivos()"/>
+            <label class="form-check-label small" for="activos">Activos</label>
         </div>
-
-        <!-- Contenido principal -->
-        <main class="main" id="main-content">
-            <!-- Aquí va el contenido principal de la página -->
-            <div id="content" class="container-fluid" onload="loadEstados();">
-  <div id="barraSuperior">
-      <div class="toggle_btn" onclick="mostrarMenu();">
-          <i class="fa-solid fa-bars"></i>
-      </div>
-    <h2 class="text-center">Gestión de Sucursal</h2>
-    <div class="menuDesplegable">
-          <li><a class="action_btn" onclick="cargarServicioSucursal()">Sucursal</a></li>
-          <li><a class="action_btn" onclick="cargarServicioEmpleado();">Empleado</a></li>
-          <li><a class="action_btn" onclick="cargarServicioAlimento();">Alimento</a></li>
-          <li><a class="action_btn" onclick="cargarServicioBebida();">Bebida</a></li>
-          <li><a class="action_btn" onclick="cargarServicioCliente();">Cliente</a></li>
-          <li><a class="action_btn" onclick="loadInicio();">Inicio</a></li>
-          <li><a class="action_btn" onclick="loadLogin();">Login</a></li>
-      </div>
-  </div>
-
-  <div id="formulario-contenedor" class="d-none">
-    <form id="form-agregar">
-      <div class="row mb-2">
-        <div class="col-md-6 col-sm-12">
-          <input type="text" id="idSucursal" class="form-control" placeholder="idSucursal" disabled />
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <input type="text" id="nombre" class="form-control" placeholder="nombre" />
-        </div>
-      </div>
-      <div class="row mb-2">
-        <div class="col-md-6 col-sm-12">
-          <input type="text" id="latitud" class="form-control" placeholder="latitud" />
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <input type="text" id="longitud" class="form-control" placeholder="longitud" />
-        </div>
-      </div>
-        <div class="row mb-2">
-        <div class="col-md-6 col-sm-12">
-          <input type="text" id="foto" class="form-control" placeholder="foto" />
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <input type="text" id="urlWeb" class="form-control" placeholder="urlWeb" />
-        </div>
-      </div>
-        <div class="row mb-2">
-        <div class="col-md-6 col-sm-12">
-          <input type="text" id="horarios" class="form-control" placeholder="horarios" />
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <input type="text" id="calle" class="form-control" placeholder="calle" />
-        </div>
-      </div>
-        <div class="row mb-2">
-        <div class="col-md-6 col-sm-12">
-          <input type="text" id="numCalle" class="form-control" placeholder="numCalle" />
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <input type="text" id="colonia" class="form-control" placeholder="colonia" />
-        </div>
-      </div>
-      <div class="row mb-2">
-        <div class="col-md-6 col-sm-12">
-            <select id="estados" class="form-control" onchange="controladorGra1.loadCiudades();">
-            <!-- Opciones de estados se cargarán aquí -->
-          </select>
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <select id="Ciudades" class="form-control">
-            <!-- Opciones de ciudades se cargarán aquí -->
-          </select>
-        </div>
-      </div>
-      <button type="button" class="btn w-20 mb-2" style="background-color: #D00303; color: white; font-weight: bold" onclick="controladorGra1.agregarSucursal()">Guardar</button>
-      <button type="button" class="btn w-20 mb-2" style="background-color: #FAAF08; color: white; font-weight: bold" onclick="controladorGra1.cancelarFormulario()">Cancelar</button>
-      <button id="btn-eliminar" type="button" class="btn w-20 mb-2" style="background-color: #FA4032; color: white; font-weight: bold" onclick="controladorGra1.eliminarSucursal();">Eliminar</button>
-
-    </form>
-  </div>
-
-  <!-- Botón de agregar -->
-  <button id="btn-agregar" class="btn btn-success w-20" style="background-color: #D00303; color: white; font-weight: bold" onclick="controladorGra1.mostrarFormulario()">Agregar</button>
-  <!-- Tabla -->
-  <div class="table-responsive">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>NOMBRE</th>
-          <th>LATITUD</th>
-          <th>LONGITUD</th>
-          <th>FOTO</th>
-          <th>URL WEB</th>
-          <th>HORARIOS</th>
-          <th>CALLE</th>
-          <th>NUM CALLE</th>
-          <th>COLONIA</th>
-          <th>CIUDAD</th>
-        </tr>
-      </thead>
-      <tbody id="renglones">
-        <!-- Los datos de los empleados se inyectarán aquí -->
-      </tbody>
-    </table>
-  </div>
-</div>
-        </main>
+        <i class="fa-solid fa-house fa-lg mt-2" onclick="loadInicio();"></i><br>
+        <span class="small">Inicio</span>
+        <i class="fas fa-power-off fa-lg mt-2" onclick="cerrarSesion();"></i><br>
+        <span class="small">Cerrar Sesión</span>
     </div>
 
-    <script>
-        const menuToggle = document.getElementById("menu-toggle");
-        const menuLateral = document.querySelector(".menu-lateral");
-        const content = document.querySelector(".content");
+    <!-- Contenido principal -->
+    <main class="main" id="main-content">
+        <div id="content" class="container-fluid p-2" onload="loadEstados();">
+            <div id="barraSuperior" class="mb-2">
+                <div class="toggle_btn" onclick="mostrarMenu();">
+                    <i class="fa-solid fa-bars"></i>
+                </div>
+                <h2 class="text-center h5 mb-1">Gestión de Sucursal</h2>
+                <div class="menuDesplegable small">
+                    <li><a class="action_btn p-1" onclick="cargarServicioSucursal()">Sucursal</a></li>
+                    <li><a class="action_btn p-1" onclick="cargarServicioEmpleado();">Empleado</a></li>
+                    <li><a class="action_btn p-1" onclick="cargarServicioAlimento();">Alimento</a></li>
+                    <li><a class="action_btn p-1" onclick="cargarServicioBebida();">Bebida</a></li>
+                    <li><a class="action_btn p-1" onclick="cargarServicioCliente();">Cliente</a></li>
+                    <li><a class="action_btn p-1" onclick="loadInicio();">Inicio</a></li>
+                    <li><a class="action_btn p-1" onclick="loadLogin();">Login</a></li>
+                </div>
+            </div>
 
-        // Acción para mostrar y ocultar el menú lateral
-        menuToggle.addEventListener("click", () => {
-            menuLateral.classList.toggle("active");
-            content.classList.toggle("active-main");
-        });
-    </script>
+            <div id="formulario-contenedor" class="d-none">
+                <form id="form-agregar" class="small">
+                    <input type="hidden" id="idSucursal" />
+
+                    <div class="row g-1 mb-1">
+                        <div class="col-md-6">
+                            <input type="text" id="nombre" class="form-control form-control-sm" placeholder="Nombre" />
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="horarios" class="form-control form-control-sm" placeholder="Horarios" />
+                        </div>
+                    </div>
+
+                    <div class="row g-1 mb-1">
+                        <div class="col-md-4">
+                            <input type="text" id="calle" class="form-control form-control-sm" placeholder="Calle" />
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" id="numCalle" class="form-control form-control-sm" placeholder="Núm" />
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="colonia" class="form-control form-control-sm" placeholder="Colonia" />
+                        </div>
+                    </div>
+
+                    <div class="row g-1 mb-1">
+                        <div class="col-md-6">
+                            <select id="estados" class="form-select form-select-sm" onchange="controladorGra1.loadCiudades();">
+                                <!-- Estados -->
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <select id="Ciudades" class="form-select form-select-sm">
+                                <!-- Ciudades -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-1 mb-1">
+                        <div class="col-md-6">
+                            <input type="text" id="latitud" class="form-control form-control-sm" placeholder="Latitud" />
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="longitud" class="form-control form-control-sm" placeholder="Longitud" />
+                        </div>
+                    </div>
+
+                    <div class="row g-1 mb-2">
+                        <div class="col-md-6">
+                            <input type="text" id="foto" class="form-control form-control-sm" placeholder="URL Foto" />
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="urlWeb" class="form-control form-control-sm" placeholder="Sitio Web" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between g-1">
+                        <button type="button" class="btn btn-sm py-0" style="background-color: #D00303; color: white;" onclick="controladorGra1.agregarSucursal()">Guardar</button>
+                        <button type="button" class="btn btn-sm py-0" style="background-color: #FAAF08; color: white;" onclick="controladorGra1.cancelarFormulario()">Cancelar</button>
+                        <button id="btn-eliminar" type="button" class="btn btn-sm py-0" style="background-color: #FA4032; color: white;" onclick="controladorGra1.eliminarSucursal();">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+
+            <button id="btn-agregar" class="btn btn-sm py-0 px-2 my-1" style="background-color: #D00303; color: white;" onclick="controladorGra1.mostrarFormulario()">+ Agregar</button>
+
+            <div class="table-responsive">
+                <table class="table table-sm table-striped small">
+                    <thead>
+                        <tr>
+                            <th>NOMBRE</th>
+                            <th>LATITUD</th>
+                            <th>LONGITUD</th>
+                            <th>FOTO</th>
+                            <th>URL WEB</th>
+                            <th>HORARIOS</th>
+                            <th>CALLE</th>
+                            <th>NUM</th>
+                            <th>COLONIA</th>
+                            <th>CIUDAD</th>
+                        </tr>
+                    </thead>
+                    <tbody id="renglones">
+                        <!-- Datos -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const menuToggle = document.getElementById("menu-toggle");
+    const menuLateral = document.querySelector(".menu-lateral");
+    const content = document.querySelector(".content");
+
+    menuToggle.addEventListener("click", () => {
+        menuLateral.classList.toggle("active");
+        content.classList.toggle("active-main");
+    });
+</script>
