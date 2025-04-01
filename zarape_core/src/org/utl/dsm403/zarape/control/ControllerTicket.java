@@ -1,55 +1,68 @@
 package org.utl.dsm403.zarape.control;
 
+import org.utl.dsm403.zarape.db.ConexionMySQL;
+import org.utl.dsm403.zarape.model.Comanda;
+import org.utl.dsm403.zarape.model.DetalleTicket;
+import org.utl.dsm403.zarape.model.Ticket;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.sql.Connection;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
-import java.util.List;
 import java.sql.Types;
-import org.utl.dsm403.zarape.db.ConexionMySQL;
-import org.utl.dsm403.zarape.model.DetalleTicket;
-import org.utl.dsm403.zarape.model.Ticket;
-
+import java.util.List;
+/**
+ *
+ * @author rodri
+ */
 public class ControllerTicket {
 
-    public Ticket insertarTicket(Ticket t, List<DetalleTicket> detalles) throws SQLException {
-    String sql = "{CALL InsertarTicket(?, ?, ?, ?)}";
+    public Comanda registrarTicket(Ticket ticket, List<DetalleTicket> detalles) throws SQLException {
+    // Validación inicial
+    if (ticket == null || detalles == null || detalles.isEmpty()) {
+        throw new IllegalArgumentException("Ticket y detalles son requeridos");
+    }
 
-    int v_idTicket;
+    String sql = "{call registrarTicket(?, ?, ?, ?, ?)}";
+    Gson gson = new Gson();
+    JsonArray jsonDetalles = new JsonArray();
     
-    ConexionMySQL connMySQL = new ConexionMySQL();
-    Connection conn = connMySQL.open();
-    
-    CallableStatement csmt = conn.prepareCall(sql);
-
-        JsonArray detallesArray = new JsonArray();
-        
-        for (DetalleTicket detalle : detalles) {
-            if (detalle.getIdProducto() == null) {
-                throw new IllegalArgumentException("Cada detalle debe tener un ID de producto.");
-            }
-
-            JsonObject obj = new JsonObject();
-            obj.addProperty("idProducto", detalle.getIdProducto());
-            obj.addProperty("cantidad", detalle.getCantidad());
-
-            detallesArray.add(obj);
+    // Convertir detalles a JSON
+    for (DetalleTicket detalle : detalles) {
+        if (detalle.getIdProducto() <= 0 || detalle.getCantidad() <= 0) {
+            throw new IllegalArgumentException("Datos de producto inválidos");
         }
-
-        csmt.setInt(1, t.getIdCliente());  
-        csmt.setInt(2, t.getIdSucursal());
-        csmt.setString(3, detallesArray.toString());
-        csmt.registerOutParameter(4, Types.INTEGER); 
-
-        csmt.executeUpdate();
-
-        v_idTicket = csmt.getInt(4);
         
-        t.setIdTicket(v_idTicket);
-        csmt.close();
-        conn.close();
+        JsonObject detalleJson = new JsonObject();
+        detalleJson.addProperty("idProducto", detalle.getIdProducto());
+        detalleJson.addProperty("cantidad", detalle.getCantidad());
+        jsonDetalles.add(detalleJson);
+    }
+    
+    try (Connection conn = new ConexionMySQL().open();
+         CallableStatement cstmt = conn.prepareCall(sql)) {
         
-        return t;
+        // Parámetros de entrada
+        cstmt.setInt(1, ticket.getIdCliente());
+        cstmt.setInt(2, ticket.getIdSucursal());
+        cstmt.setString(3, gson.toJson(jsonDetalles));
+        
+        // Parámetros de salida
+        cstmt.registerOutParameter(4, Types.INTEGER);
+        cstmt.registerOutParameter(5, Types.INTEGER);
+        
+        cstmt.executeUpdate();
+        
+        // Obtener IDs generados
+        Comanda comanda = new Comanda();
+        comanda.setIdComanda(cstmt.getInt(5));
+        comanda.setEstatus(1);
+        
+        ticket.setIdTicket(cstmt.getInt(4));
+        comanda.setTicket(ticket);
+        
+        return comanda;
+        }
     }
 }

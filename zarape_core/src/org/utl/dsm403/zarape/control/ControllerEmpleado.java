@@ -18,6 +18,21 @@ import org.utl.dsm403.zarape.model.Usuario;
 
 
 public class ControllerEmpleado {
+    
+    public boolean validarToken(String nombreUsuario) throws SQLException {
+    String sql = "SELECT 1 FROM usuario WHERE nombre = ? AND lastToken IS NOT NULL"; 
+    ConexionMySQL objConMySQL = new ConexionMySQL();
+
+    try (Connection conn = objConMySQL.open()) {
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, nombreUsuario);
+        ResultSet rs = pstmt.executeQuery();
+        return rs.next(); 
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+        return false;
+    }
+}
 
     public Empleado add(Empleado e) throws SQLException {
         String sql = "CALL insertarEmpleado( ?,?,?,?,?,?,?,"

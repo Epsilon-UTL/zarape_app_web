@@ -35,7 +35,7 @@
           <li><a class="action_btn" onclick="cargarServicioBebida();">Bebida</a></li>
           <li><a class="action_btn" onclick="cargarServicioCliente();">Cliente</a></li>
           <li><a class="action_btn" onclick="loadInicio();">Inicio</a></li>
-          <li><a class="action_btn" onclick="loadLogin();">Login</a></li>
+          <li><a class="action_btn" onclick="cerrarSesion();">Login</a></li>
       </div>
   </div>
 
@@ -104,7 +104,7 @@
 
         // Acción para mostrar y ocultar el menú lateral
         menuToggle.addEventListener("click", () => {
-            menuLateral.classList.toggle("active");
+            menuLateral.classList.toggle("active"); 
             content.classList.toggle("active-main");
         });
     </script>

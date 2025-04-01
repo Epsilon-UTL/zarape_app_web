@@ -6,13 +6,11 @@ let idPersona = null;
 let idUsuario = null;
 let validacionesInicializadas = false;
 
-// Función para inicializar todas las validaciones
 export function inicializarValidaciones() {
     if (validacionesInicializadas) return;
     
     console.log("Inicializando validaciones para cliente...");
 
-    // Validación del nombre
     document.getElementById("nombre")?.addEventListener("input", function () {
         validarCampo(
             this,
@@ -24,7 +22,6 @@ export function inicializarValidaciones() {
         );
     });
 
-    // Validación de los apellidos
     document.getElementById("apellidos")?.addEventListener("input", function () {
         validarCampo(
             this,
@@ -36,7 +33,6 @@ export function inicializarValidaciones() {
         );
     });
 
-    // Validación del teléfono
     document.getElementById("telefono")?.addEventListener("input", function () {
         validarCampo(
             this,
@@ -48,7 +44,6 @@ export function inicializarValidaciones() {
         );
     });
 
-    // Validación del usuario
     document.getElementById("usuario")?.addEventListener("input", function () {
         validarCampo(
             this,
@@ -60,7 +55,6 @@ export function inicializarValidaciones() {
         );
     });
 
-    // Validación de la contraseña
     document.getElementById("contrasenia")?.addEventListener("input", function () {
         validarCampo(
             this,
@@ -72,19 +66,18 @@ export function inicializarValidaciones() {
         );
     });
 
-    // Validar formulario antes de enviar
     document.getElementById("btn-guardar")?.addEventListener("click", function (event) {
-        const errores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div");
-        if (errores.length > 0) {
+        const tieneErrores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div").length > 0;
+
+        if (tieneErrores) {
             event.preventDefault();
-            alert("Hay errores en el formulario. Corrígelos antes de continuar.");
-        }
-    });
+            alert("Completa todos los campos correctamente antes de guardar");
+            }
+        });
+        validacionesInicializadas = true;
+    }
 
-    validacionesInicializadas = true;
-}
 
-// Función para cargar las ciudades basadas en el estado seleccionado
 export function loadCiudades() {
     const v_edo = document.getElementById("estados")?.value;
     const v_ciudades = document.getElementById("ciudades");
@@ -102,7 +95,6 @@ export function loadCiudades() {
     });
 }
 
-// Cargar ciudades desde el servidor
 fetch('http://localhost:8080/Zarape/api/ciudad/getAllCiudades')
     .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
     .then(city => {
@@ -111,10 +103,9 @@ fetch('http://localhost:8080/Zarape/api/ciudad/getAllCiudades')
     })
     .catch(error => console.error("Error al cargar las ciudades:", error));
 
-// Escuchar cambios en el select de estados
 document.getElementById("estados")?.addEventListener('change', loadCiudades);
 
-// Función para cargar los estados
+
 export function loadEstados() {
     const v_estados = document.getElementById("estados");
     if (!v_estados) return;
@@ -128,7 +119,7 @@ export function loadEstados() {
     });
 }
 
-// Cargar estados desde el servidor
+
 fetch('http://localhost:8080/Zarape/api/datos/getAllEstados')
     .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
     .then(datos => {
@@ -137,7 +128,7 @@ fetch('http://localhost:8080/Zarape/api/datos/getAllEstados')
     })
     .catch(error => console.error("Error al cargar los estados:", error));
 
-// Función para mostrar/ocultar el formulario
+
 export function mostrarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
     const btnGuardar = document.getElementById("btn-agregar");
@@ -148,7 +139,7 @@ export function mostrarFormulario() {
     }
 }
 
-// Función para cancelar el formulario
+
 export function cancelarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
     const btnGuardar = document.getElementById("btn-agregar");
@@ -163,7 +154,7 @@ export function cancelarFormulario() {
     validacionesInicializadas = false;
 }
 
-// Función para cargar los clientes
+
 export function loadCliente() {
     const username = localStorage.getItem("nombreUsuario");
     if (!username) return;
@@ -180,137 +171,195 @@ export function loadCliente() {
         .catch(error => console.error("Error al cargar los clientes:", error));
 }
 
-// Función para agregar un cliente
+
 export function agregarCliente() {
     const username = localStorage.getItem("nombreUsuario");
-    if (!username) return;
 
-    const errores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div");
-    if (errores.length > 0) {
-        alert("Hay errores en el formulario. Corrígelos antes de continuar.");
+    const camposRequeridos = ["nombre", "apellidos", "telefono", "ciudades", "estados", "usuario", "contrasenia"];
+    const camposVacios = camposRequeridos.some(id => !document.getElementById(id).value.trim());
+
+    if (camposVacios) {
+        alert("Todos los campos son obligatorios.");
         return;
     }
 
-    const cliente = {
-        idCliente: -1,
+    const errores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div");
+    if (errores.length > 0) {
+        return; 
+    }
+
+    let v_idPersona = idPersona || -1;
+    let v_idUsuario = idUsuario || -1;
+    let v_nombre = document.getElementById("nombre").value;
+    let v_apellidos = document.getElementById("apellidos").value;
+    let v_telefono = document.getElementById("telefono").value;
+    let v_ciudad = document.getElementById("ciudades").value;
+    let v_estado = document.getElementById("estados").value;
+    let v_user = document.getElementById("usuario").value;
+    let v_contrasenia = document.getElementById("contrasenia").value;
+
+    let cliente = {
+        idCliente: -1, 
         activo: 1,
         persona: {
-            idPersona: idPersona || -1,
-            nombre: document.getElementById("nombre").value,
-            apellidos: document.getElementById("apellidos").value,
-            telefono: document.getElementById("telefono").value,
+            idPersona: v_idPersona,
+            nombre: v_nombre,
+            apellidos: v_apellidos,
+            telefono: v_telefono,
             ciudad: {
-                idCiudad: document.getElementById("ciudades").value,
+                idCiudad: v_ciudad,
                 nombre: "",
                 estado: {
-                    idEstado: document.getElementById("estados").value,
+                    idEstado: v_estado,
                     nombre: ""
                 }
             }
         },
         usuario: {
-            idUsuario: idUsuario || -1,
+            idUsuario: v_idUsuario,
             activo: 1,
-            nombre: document.getElementById("usuario").value,
-            contrasenia: document.getElementById("contrasenia").value
+            nombre: v_user,
+            contrasenia: v_contrasenia
         }
     };
 
-    const parametro = new URLSearchParams({ datosCliente: JSON.stringify(cliente) });
+    let datos_servidor = { datosCliente: JSON.stringify(cliente) };
+    let parametro = new URLSearchParams(datos_servidor);
 
-    fetch('http://localhost:8080/Zarape/api/cliente/agregarCliente', {
+    let registro = {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             "username": username
         },
         body: parametro
-    })
-        .then(response => response.ok ? response.json() : Promise.reject('Error al agregar'))
-        .then(() => loadCliente())
-        .catch(error => console.error("Error al agregar el cliente:", error))
-        .finally(() => {
-            limpiar();
-            cancelarFormulario();
-        });
+    };
+
+    fetch('http://localhost:8080/Zarape/api/cliente/agregarCliente', registro)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud');
+            }
+            return response.json();
+        })
+        .then(json => {
+            console.log(json);
+            fetch('http://localhost:8080/Zarape/api/cliente/getAllCliente', {
+                headers: { "username": username }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la solicitud');
+                    }
+                    return response.json();
+                })
+                .then(registro => {
+                    listCliente = registro;
+                    loadCliente();
+                })
+                .catch(error => console.error("Error al obtener clientes:", error));
+        })
+        .catch(error => console.error("Error al agregar el cliente:", error));
+
+    limpiar();
+    cancelarFormulario();
 }
 
-// Función para eliminar un cliente
 export function eliminarCliente() {
-    if (!idPersona) {
-        alert("No hay ningún cliente seleccionado para eliminar");
+    const confirmacion = confirm("¿Estás seguro de que deseas eliminar este cliente?");
+    if (!confirmacion) {
         return;
     }
 
-    if (!confirm("¿Estás seguro de que deseas eliminar este cliente?")) return;
-
     const username = localStorage.getItem("nombreUsuario");
-    if (!username) return;
-
+    
     const clienteAEliminar = listCliente.find(cli => cli.persona.idPersona === idPersona);
+    
     if (!clienteAEliminar) {
         alert("No se encontró el cliente a eliminar");
         return;
     }
 
-    const parametro = new URLSearchParams({ idCliente: clienteAEliminar.idCliente });
+    let datos_servidor = { idCliente: clienteAEliminar.idCliente };
+    let parametro = new URLSearchParams(datos_servidor);
 
-    fetch('http://localhost:8080/Zarape/api/cliente/eliminarCliente', {
+    let registro = {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             "username": username
         },
         body: parametro
-    })
-        .then(response => response.ok ? response.json() : Promise.reject('Error al eliminar'))
-        .then(() => loadCliente())
-        .catch(error => console.error("Error al eliminar el cliente:", error))
-        .finally(() => {
-            limpiar();
-            cancelarFormulario();
-        });
+    };
+
+    fetch('http://localhost:8080/Zarape/api/cliente/eliminarCliente', registro)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud');
+            }
+            return response.json();
+        })
+        .then(json => {
+            console.log(json);
+            fetch('http://localhost:8080/Zarape/api/cliente/getAllCliente', {
+                headers: { "username": username }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la solicitud');
+                    }
+                    return response.json();
+                })
+                .then(registro => {
+                    listCliente = registro;
+                    mostrarInactivos();
+                })
+                .catch(error => console.error("Error al obtener la lista de clientes:", error));
+        })
+        .catch(error => console.error("Error al eliminar el cliente:", error));
+
+    limpiar();
+    cancelarFormulario();
 }
 
-// Función para seleccionar un registro
 export function selectRegistro(indice) {
-    if (indice < 0 || indice >= listCliente.length) return;
+    if (indice < 0 || indice >= listCliente.length) {
+        console.error("Índice fuera de rango");
+        return;
+    }
 
     const cliente = listCliente[indice];
     document.getElementById("nombre").value = cliente.persona.nombre;
     document.getElementById("apellidos").value = cliente.persona.apellidos;
     document.getElementById("telefono").value = cliente.persona.telefono;
     document.getElementById("estados").value = cliente.persona.ciudad.estado.idEstado;
+    document.getElementById("ciudades").value = cliente.persona.ciudad.idCiudad;
     document.getElementById("usuario").value = cliente.usuario.nombre;
     document.getElementById("contrasenia").value = cliente.usuario.contrasenia;
-    
     idPersona = cliente.persona.idPersona;
     idUsuario = cliente.usuario.idUsuario;
-    
     mostrarFormulario();
+
+    // Asegurar que las ciudades se carguen correctamente
     loadCiudades();
-    
     setTimeout(() => {
         document.getElementById("ciudades").value = cliente.persona.ciudad.idCiudad;
-    }, 100);
+    }, 10);
 }
 
-// Función para limpiar el formulario
 export function limpiar() {
-    ["nombre", "apellidos", "telefono", "estados", "ciudades", "usuario", "contrasenia"].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) element.value = "";
+    const campos = ["nombre", "apellidos", "telefono", "estados", "ciudades", "usuario", "contrasenia"];
+    campos.forEach(id => {
+        document.getElementById(id).value = "";
     });
     idPersona = null;
     idUsuario = null;
 }
 
-// Función para limpiar mensajes de error
 export function limpiarMensajesError() {
     document.querySelectorAll('[id^="error-"]').forEach(error => error.innerHTML = '');
 }
 
-// Función para mostrar clientes activos/inactivos
 export function mostrarInactivos() {
     const mostrarActivos = document.getElementById("activos")?.checked;
     const table = document.getElementById("renglones");
@@ -338,7 +387,6 @@ export function mostrarInactivos() {
     if (btnEliminar) btnEliminar.classList.toggle("d-none", !mostrarActivos);
 }
 
-// Función genérica para validar campos
 function validarCampo(input, regex, minLength, maxLength, errorDiv, mensajeError) {
     if (!input || !errorDiv) return;
 
@@ -353,7 +401,6 @@ function validarCampo(input, regex, minLength, maxLength, errorDiv, mensajeError
     }
 }
 
-// Función para cerrar sesión
 export function cerrarSesion() {
     const nombreUsuario = localStorage.getItem('nombreUsuario');
     if (!nombreUsuario) return;

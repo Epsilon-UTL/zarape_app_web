@@ -7,35 +7,11 @@ let idPersona = null;
 let idUsuario = null;
 let validacionesInicializadas = false;
 
-// Función para cerrar sesión
-export function cerrarSesion() {
-    const nombreUsuario = localStorage.getItem('nombreUsuario');
-    if (!nombreUsuario) return;
-
-    const url = new URL('http://localhost:8080/Zarape/api/login/cerrarsesion');
-    url.search = new URLSearchParams({ 'nombre': nombreUsuario });
-
-    fetch(url, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-    })
-        .then(response => response.ok ? response.json() : Promise.reject('Error al cerrar sesión'))
-        .finally(() => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('nombreUsuario');
-            alert("Cerrando sesión");
-            loadLogin();
-        })
-        .catch(error => console.error('Error:', error));
-}
-
-// Función para inicializar todas las validaciones
 export function inicializarValidaciones() {
     if (validacionesInicializadas) return;
     
     console.log("Inicializando validaciones para empleado...");
 
-    // Validación del nombre
     document.getElementById("nombre")?.addEventListener("input", function () {
         validarCampo(
             this,
@@ -47,7 +23,6 @@ export function inicializarValidaciones() {
         );
     });
 
-    // Validación de los apellidos
     document.getElementById("apellidos")?.addEventListener("input", function () {
         validarCampo(
             this,
@@ -59,7 +34,6 @@ export function inicializarValidaciones() {
         );
     });
 
-    // Validación del teléfono
     document.getElementById("telefono")?.addEventListener("input", function () {
         validarCampo(
             this,
@@ -71,7 +45,6 @@ export function inicializarValidaciones() {
         );
     });
 
-    // Validación del usuario
     document.getElementById("usuario")?.addEventListener("input", function () {
         validarCampo(
             this,
@@ -83,7 +56,6 @@ export function inicializarValidaciones() {
         );
     });
 
-    // Validación de la contraseña
     document.getElementById("contrasenia")?.addEventListener("input", function () {
         validarCampo(
             this,
@@ -95,19 +67,18 @@ export function inicializarValidaciones() {
         );
     });
 
-    // Validar formulario antes de enviar
-    document.getElementById("btn-agregar")?.addEventListener("click", function (event) {
-        const errores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div");
-        if (errores.length > 0) {
+    document.getElementById("btn-guardar")?.addEventListener("click", function (event) {
+        const tieneErrores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div").length > 0;
+
+        if (tieneErrores) {
             event.preventDefault();
-            alert("Hay errores en el formulario. Corrígelos antes de continuar.");
+            alert("Completa todos los campos correctamente antes de guardar");
         }
     });
-
+    
     validacionesInicializadas = true;
 }
 
-// Función para cargar las ciudades basadas en el estado seleccionado
 export function loadCiudades() {
     const v_edo = document.getElementById("estados")?.value;
     const v_ciudades = document.getElementById("ciudades");
@@ -125,7 +96,6 @@ export function loadCiudades() {
     });
 }
 
-// Cargar ciudades desde el servidor
 fetch('http://localhost:8080/Zarape/api/ciudad/getAllCiudades')
     .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
     .then(city => {
@@ -134,7 +104,8 @@ fetch('http://localhost:8080/Zarape/api/ciudad/getAllCiudades')
     })
     .catch(error => console.error("Error al cargar las ciudades:", error));
 
-// Función para cargar los estados
+document.getElementById("estados")?.addEventListener('change', loadCiudades);
+
 export function loadEstados() {
     const v_estados = document.getElementById("estados");
     if (!v_estados) return;
@@ -148,7 +119,6 @@ export function loadEstados() {
     });
 }
 
-// Cargar estados desde el servidor
 fetch('http://localhost:8080/Zarape/api/datos/getAllEstados')
     .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
     .then(datos => {
@@ -157,8 +127,7 @@ fetch('http://localhost:8080/Zarape/api/datos/getAllEstados')
     })
     .catch(error => console.error("Error al cargar los estados:", error));
 
-// Función para cargar las sucursales
-export function SelectSucursales() {
+export function loadSucursales() {
     const v_sucursales = document.getElementById("sucursales");
     if (!v_sucursales) return;
     
@@ -171,16 +140,14 @@ export function SelectSucursales() {
     });
 }
 
-// Cargar sucursales desde el servidor
 fetch('http://localhost:8080/Zarape/api/sucursales/getAllSucursales')
     .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
     .then(datos => {
         listSucursales = datos;
-        SelectSucursales();
+        loadSucursales();
     })
     .catch(error => console.error("Error al cargar las sucursales:", error));
 
-// Función para mostrar/ocultar el formulario
 export function mostrarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
     const btnGuardar = document.getElementById("btn-agregar");
@@ -191,7 +158,6 @@ export function mostrarFormulario() {
     }
 }
 
-// Función para cancelar el formulario
 export function cancelarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
     const btnGuardar = document.getElementById("btn-agregar");
@@ -206,9 +172,14 @@ export function cancelarFormulario() {
     validacionesInicializadas = false;
 }
 
-// Función para cargar los empleados
 export function loadEmpleado() {
-    fetch('http://localhost:8080/Zarape/api/empleado/getAllEmpleados')
+    const username = localStorage.getItem("nombreUsuario");
+    if (!username) return;
+
+    fetch("http://localhost:8080/Zarape/api/empleado/getAllEmpleados", {
+        method: "GET",
+        headers: { "username": username, "Content-Type": "application/json" }
+    })
         .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
         .then(registro => {
             listEmpleado = registro;
@@ -217,19 +188,38 @@ export function loadEmpleado() {
         .catch(error => console.error("Error al cargar los empleados:", error));
 }
 
-// Función para agregar un empleado
 export function agregarEmpleado() {
-    const errores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div");
-    if (errores.length > 0) {
-        alert("Hay errores en el formulario. Corrígelos antes de continuar.");
+    const username = localStorage.getItem("nombreUsuario");
+
+    const camposRequeridos = ["nombre", "apellidos", "telefono", "ciudades", "estados", "usuario", "contrasenia", "sucursales"];
+    const camposVacios = camposRequeridos.some(id => !document.getElementById(id).value.trim());
+
+    if (camposVacios) {
+        alert("Todos los campos son obligatorios.");
         return;
     }
 
-    const empleado = {
-        idEmpleado: -1,
+    const errores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div");
+    if (errores.length > 0) {
+        return; 
+    }
+
+    let v_idPersona = idPersona || -1;
+    let v_idUsuario = idUsuario || -1;
+    let v_nombre = document.getElementById("nombre").value;
+    let v_apellidos = document.getElementById("apellidos").value;
+    let v_telefono = document.getElementById("telefono").value;
+    let v_ciudad = document.getElementById("ciudades").value;
+    let v_estado = document.getElementById("estados").value;
+    let v_user = document.getElementById("usuario").value;
+    let v_contrasenia = document.getElementById("contrasenia").value;
+    let v_sucursal = document.getElementById("sucursales").value;
+
+    let empleado = {
+        idEmpleado: -1, 
         activo: 1,
         sucursal: {
-            idSucursal: parseInt(document.getElementById("sucursales").value),
+            idSucursal: v_sucursal,
             activo: 1,
             nombre: "",
             latitud: "",
@@ -241,123 +231,175 @@ export function agregarEmpleado() {
             numCalle: "",
             colonia: "",
             ciudad: {
-                idCiudad: parseInt(document.getElementById("ciudades").value),
+                idCiudad: v_ciudad,
                 nombre: "",
                 estado: {
-                    idEstado: parseInt(document.getElementById("estados").value),
+                    idEstado: v_estado,
                     nombre: ""
                 }
             }
         },
         persona: {
-            idPersona: idPersona || -1,
-            nombre: document.getElementById("nombre").value,
-            apellidos: document.getElementById("apellidos").value,
-            telefono: document.getElementById("telefono").value,
+            idPersona: v_idPersona,
+            nombre: v_nombre,
+            apellidos: v_apellidos,
+            telefono: v_telefono,
             ciudad: {
-                idCiudad: document.getElementById("ciudades").value,
+                idCiudad: v_ciudad,
                 nombre: "",
                 estado: {
-                    idEstado: document.getElementById("estados").value,
+                    idEstado: v_estado,
                     nombre: ""
                 }
             }
         },
         usuario: {
-            idUsuario: idUsuario || -1,
+            idUsuario: v_idUsuario,
             activo: 1,
-            nombre: document.getElementById("usuario").value,
-            contrasenia: document.getElementById("contrasenia").value
+            nombre: v_user,
+            contrasenia: v_contrasenia
         }
     };
 
-    const parametro = new URLSearchParams({ datosEmpleado: JSON.stringify(empleado) });
+    let datos_servidor = { datosEmpleado: JSON.stringify(empleado) };
+    let parametro = new URLSearchParams(datos_servidor);
 
-    fetch('http://localhost:8080/Zarape/api/empleado/agregar', {
+    let registro = {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "username": username
+        },
         body: parametro
-    })
-        .then(response => response.ok ? response.json() : Promise.reject('Error al agregar'))
-        .then(() => loadEmpleado())
-        .catch(error => console.error("Error al agregar el empleado:", error))
-        .finally(() => {
-            limpiar();
-            cancelarFormulario();
-        });
+    };
+
+    fetch('http://localhost:8080/Zarape/api/empleado/agregar', registro)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud');
+            }
+            return response.json();
+        })
+        .then(json => {
+            console.log(json);
+            fetch('http://localhost:8080/Zarape/api/empleado/getAllEmpleados', {
+                headers: { "username": username }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la solicitud');
+                    }
+                    return response.json();
+                })
+                .then(registro => {
+                    listEmpleado = registro;
+                    loadEmpleado();
+                })
+                .catch(error => console.error("Error al obtener empleados:", error));
+        })
+        .catch(error => console.error("Error al agregar el empleado:", error));
+
+    limpiar();
+    cancelarFormulario();
 }
 
-// Función para eliminar un empleado
 export function eliminarEmpleado() {
-    if (!idPersona) {
-        alert("No hay ningún empleado seleccionado para eliminar");
+    const confirmacion = confirm("¿Estás seguro de que deseas eliminar este empleado?");
+    if (!confirmacion) {
         return;
     }
 
-    if (!confirm("¿Estás seguro de que deseas eliminar este empleado?")) return;
-
+    const username = localStorage.getItem("nombreUsuario");
+    
     const empleadoAEliminar = listEmpleado.find(emp => emp.persona.idPersona === idPersona);
+    
     if (!empleadoAEliminar) {
         alert("No se encontró el empleado a eliminar");
         return;
     }
 
-    const parametro = new URLSearchParams({ idEmpleado: empleadoAEliminar.idEmpleado });
+    let datos_servidor = { idEmpleado: empleadoAEliminar.idEmpleado };
+    let parametro = new URLSearchParams(datos_servidor);
 
-    fetch('http://localhost:8080/Zarape/api/empleado/eliminar', {
+    let registro = {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "username": username
+        },
         body: parametro
-    })
-        .then(response => response.ok ? response.json() : Promise.reject('Error al eliminar'))
-        .then(() => loadEmpleado())
-        .catch(error => console.error("Error al eliminar el empleado:", error))
-        .finally(() => {
-            limpiar();
-            cancelarFormulario();
-        });
+    };
+
+    fetch('http://localhost:8080/Zarape/api/empleado/eliminar', registro)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud');
+            }
+            return response.json();
+        })
+        .then(json => {
+            console.log(json);
+            fetch('http://localhost:8080/Zarape/api/empleado/getAllEmpleados', {
+                headers: { "username": username }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la solicitud');
+                    }
+                    return response.json();
+                })
+                .then(registro => {
+                    listEmpleado = registro;
+                    mostrarInactivos();
+                })
+                .catch(error => console.error("Error al obtener la lista de empleados:", error));
+        })
+        .catch(error => console.error("Error al eliminar el empleado:", error));
+
+    limpiar();
+    cancelarFormulario();
 }
 
-// Función para seleccionar un registro
 export function selectRegistro(indice) {
-    if (indice < 0 || indice >= listEmpleado.length) return;
+    if (indice < 0 || indice >= listEmpleado.length) {
+        console.error("Índice fuera de rango");
+        return;
+    }
 
     const empleado = listEmpleado[indice];
     document.getElementById("nombre").value = empleado.persona.nombre;
     document.getElementById("apellidos").value = empleado.persona.apellidos;
     document.getElementById("telefono").value = empleado.persona.telefono;
     document.getElementById("estados").value = empleado.persona.ciudad.estado.idEstado;
+    document.getElementById("ciudades").value = empleado.persona.ciudad.idCiudad;
     document.getElementById("usuario").value = empleado.usuario.nombre;
     document.getElementById("contrasenia").value = empleado.usuario.contrasenia;
     document.getElementById("sucursales").value = empleado.sucursal.idSucursal;
     
     idPersona = empleado.persona.idPersona;
     idUsuario = empleado.usuario.idUsuario;
-    
     mostrarFormulario();
+
+    // Asegurar que las ciudades se carguen correctamente
     loadCiudades();
-    
     setTimeout(() => {
         document.getElementById("ciudades").value = empleado.persona.ciudad.idCiudad;
-    }, 100);
+    }, 10);
 }
 
-// Función para limpiar el formulario
 export function limpiar() {
-    ["nombre", "apellidos", "telefono", "estados", "ciudades", "usuario", "contrasenia", "sucursales"].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) element.value = "";
+    const campos = ["nombre", "apellidos", "telefono", "estados", "ciudades", "usuario", "contrasenia", "sucursales"];
+    campos.forEach(id => {
+        document.getElementById(id).value = "";
     });
     idPersona = null;
     idUsuario = null;
 }
 
-// Función para limpiar mensajes de error
 export function limpiarMensajesError() {
     document.querySelectorAll('[id^="error-"]').forEach(error => error.innerHTML = '');
 }
 
-// Función para mostrar empleados activos/inactivos
 export function mostrarInactivos() {
     const mostrarActivos = document.getElementById("activos")?.checked;
     const table = document.getElementById("renglones");
@@ -386,7 +428,6 @@ export function mostrarInactivos() {
     if (btnEliminar) btnEliminar.classList.toggle("d-none", !mostrarActivos);
 }
 
-// Función genérica para validar campos
 function validarCampo(input, regex, minLength, maxLength, errorDiv, mensajeError) {
     if (!input || !errorDiv) return;
 
@@ -399,4 +440,25 @@ function validarCampo(input, regex, minLength, maxLength, errorDiv, mensajeError
         errorItem.innerHTML = mensajeError;
         errorDiv.appendChild(errorItem);
     }
+}
+
+export function cerrarSesion() {
+    const nombreUsuario = localStorage.getItem('nombreUsuario');
+    if (!nombreUsuario) return;
+
+    const url = new URL('http://localhost:8080/Zarape/api/login/cerrarsesion');
+    url.search = new URLSearchParams({ 'nombre': nombreUsuario });
+
+    fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    })
+        .then(response => response.ok ? response.json() : Promise.reject('Error al cerrar sesión'))
+        .finally(() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('nombreUsuario');
+            alert("Cerrando sesión");
+            loadLogin();
+        })
+        .catch(error => console.error('Error:', error));
 }
