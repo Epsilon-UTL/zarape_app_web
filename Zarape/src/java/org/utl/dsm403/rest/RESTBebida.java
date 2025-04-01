@@ -120,4 +120,27 @@ public class RESTBebida {
         }
         return Response.status(Response.Status.OK).entity(out).build();
     }
+    
+    @Path("getAllBd")
+    @Produces(MediaType. APPLICATION_JSON)
+    @GET
+    public Response getAll(@HeaderParam("username") String username) throws SQLException{
+    
+    {
+        String out = null;
+        
+        List<Bebida> bebida = null; 
+        ControllerBebida b = new ControllerBebida();
+        
+        try {
+            bebida = b.getAll();
+            out = new Gson().toJson(bebida);
+        } catch (Exception e) {
+            out= """
+                 {"Error":"Ocurrio un error. Intenta mas tarde."}
+                 """;
+        }
+        return Response.status(Response.Status.OK).entity(out).build();
+        }
+    }
 }
