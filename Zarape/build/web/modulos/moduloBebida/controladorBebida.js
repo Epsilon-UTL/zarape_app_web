@@ -13,7 +13,7 @@ export function loadCategoriaBd() {
             );
 }
 
-fetch('http://localhost:8080/zarape/api/categoria/getAllCategoriaBebidas')
+fetch('http://localhost:8080/Zarape/api/categoria/getAllCategoriaBebidas')
         .then(response=> response.json())
         .then(
             datos=>{
@@ -42,7 +42,7 @@ export function loadBebida(){
     mostrarInactivos();
     }
     const username=localStorage.getItem("nombreUsuario");
-    fetch('http://localhost:8080/zarape/api/bebida/getAllBebida',{
+    fetch('http://localhost:8080/Zarape/api/bebida/getAllBebida',{
         method:"GET",
         headers:{
             "username":username,
@@ -98,11 +98,11 @@ export function agregarBebida() {
         body: parametro
     };
 
-    fetch('http://localhost:8080/zarape/api/bebida/agregarBebida', registro)
+    fetch('http://localhost:8080/Zarape/api/bebida/agregarBebida', registro)
         .then(response => response.json())
         .then(json => {
             console.log(json);
-            return fetch('http://localhost:8080/zarape/api/bebida/getAllBebida');
+            return fetch('http://localhost:8080/Zarape/api/bebida/getAllBebida');
         })
         .then(response => response.json())
         .then(registro => {
@@ -115,7 +115,7 @@ export function agregarBebida() {
 
 let idproducto = null;
 export function selectRegistro(indice) { 
-    document.getElementById("idBebida").value = listBebida[indice].idBebida;
+    document.getElementById("idBebida").value = listB6666/ebida[indice].idBebida;
     document.getElementById("nombre").value = listBebida[indice].producto.nombre;
     document.getElementById("precio").value = listBebida[indice].producto.precio;
     document.getElementById("descripcion").value = listBebida[indice].producto.descripcion;
@@ -153,7 +153,7 @@ export function eliminarBebida() {
         body: parametro
     };
 
-    fetch('http://localhost:8080/zarape/api/bebida/eliminarBebida', registro)
+    fetch('http://localhost:8080/Zarape/api/bebida/eliminarBebida', registro)
         .then(response => response.json())
         .then(json => {
             console.log(json);
