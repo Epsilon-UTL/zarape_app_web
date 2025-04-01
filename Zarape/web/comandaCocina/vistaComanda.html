@@ -2,139 +2,418 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Vista de Comandas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrador de Comandas</title>
     <style>
-        .comanda {
-            border: 1px solid #ddd;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            overflow: hidden;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
         }
-        .encabezado {
-            padding: 10px;
+        
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 300px;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background-color: #eee;
+        }
+        
+        .card-content {
+            padding: 20px;
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #222;
+        }
+        
+        .card-description {
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+        
+        .card-details {
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        
+        .detail-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
         }
-        .detalle {
-            padding: 10px;
-            background-color: #f9f9f9;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        .en-proceso { background-color: #8B4513; color: white; }
-        .terminado { background-color: #4CAF50; color: white; }
-        .entregado { background-color: #2196F3; color: white; }
-        .cancelado { background-color: #616161; color: white; }
-        .estado-badge {
+        
+        /* Estilos para los spinners de estado */
+        .status-spinner {
+            position: absolute;
+            top: 15px;
+            right: 15px;
             padding: 5px 10px;
-            border-radius: 3px;
+            border-radius: 20px;
+            font-size: 0.8rem;
             font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .status-1 { /* En proceso */
+            background-color: #8B4513; /* Café */
+            animation: pulse 2s infinite;
+        }
+        
+        .status-2 { /* Terminado */
+            background-color: #2ecc71; /* Verde */
+        }
+        
+        .status-3 { /* Entregado */
+            background-color: #3498db; /* Azul */
+        }
+        
+        .status-4 { /* Cancelado */
+            background-color: #333; /* Gris oscuro */
+            text-decoration: line-through;
+        }
+        
+
+        
+        /* Selector de estado */
+        .status-selector {
+            margin-top: 10px;
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            cursor: pointer;
+        }
+        
+        .status-selector:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .save-btn {
+            display: block;
+            width: 100%;
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .save-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .cards-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .card {
+                width: 90%;
+                max-width: 350px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Cola de Comandas</h1>
-    <div id="colaComandas"></div>
+    <h1>Administrador de Comandas</h1>
+    
+    <div class="cards-container" id="comandas-container">
+        <div class="loading">Cargando comandas...</div>
+    </div>
 
     <script>
-        // Función para obtener comandas del servidor
-        function obtenerComandas() {
-            fetch('/api/comandas')
-                .then(response => response.json())
-                .then(data => actualizarVista(data))
-                .catch(error => console.error('Error:', error));
-        }
+        // Mapeo de estatus a texto
+        const statusText = {
+            1: 'En proceso',
+            2: 'Terminado',
+            3: 'Entregado',
+            4: 'Cancelado'
+        };
 
-        // Función para actualizar el estado de una comanda
-        function actualizarEstado(folio, nuevoEstado) {
-            fetch(`/api/comandas/${folio}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ estado: nuevoEstado })
-            })
-            .then(response => {
-                if (response.ok) {
-                    obtenerComandas(); // Refrescar la vista
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        // Función para renderizar las comandas
-        function actualizarVista(comandas) {
-            const contenedor = document.getElementById('colaComandas');
-            contenedor.innerHTML = '';
-
-            comandas.forEach(comanda => {
-                const comandaDiv = document.createElement('div');
-                comandaDiv.className = 'comanda';
-
-                // Encabezado
-                const encabezadoDiv = document.createElement('div');
-                encabezadoDiv.className = 'encabezado';
+        // Obtener comandas desde el backend
+        async function fetchComandas() {
+            try {
+                const response = await fetch('http://localhost:8080/Zarape/api/comanda/getAllFIFO');
+                if (!response.ok) throw new Error('Error al cargar comandas');
+                const data = await response.json();
                 
-                // Determinar clase CSS según estado
-                let estadoClass = '';
-                switch(comanda.estado) {
-                    case 'En proceso': estadoClass = 'en-proceso'; break;
-                    case 'Terminado': estadoClass = 'terminado'; break;
-                    case 'Entregado': estadoClass = 'entregado'; break;
-                    case 'Cancelado': estadoClass = 'cancelado'; break;
-                }
+                // Verificar estructura de datos
+                console.log('Datos recibidos:', data);
+                return Array.isArray(data) ? data : [];
+            } catch (error) {
+                console.error('Error al obtener comandas:', error);
+                showError('Error al cargar comandas');
+                return [];
+            }
+        }
 
-                encabezadoDiv.innerHTML = `
-                    <div>
-                        <strong>Folio:</strong> ${comanda.folio} | 
-                        <strong>Fecha/Hora:</strong> ${new Date(comanda.fechaHoraRegistro).toLocaleString()}
-                    </div>
-                    <div>
-                        <span class="estado-badge ${estadoClass}">${comanda.estado}</span>
-                        ${comanda.estado === 'En proceso' ? 
-                            `<button onclick="actualizarEstado(${comanda.folio}, 'Terminado')">Terminar</button>
-                             <button onclick="actualizarEstado(${comanda.folio}, 'Cancelado')">Cancelar</button>` : 
-                         comanda.estado === 'Terminado' ? 
-                            `<button onclick="actualizarEstado(${comanda.folio}, 'Entregado')">Entregar</button>` : 
-                         ''}
+        // Actualizar estatus en el backend
+        async function updateStatus(idComanda, newStatus) {
+            try {
+                const response = await fetch(`http://localhost:8080/Zarape/api/comanda/changeStatus?idComanda=${idComanda}&estatus=${newStatus}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Error al actualizar estatus');
+                return await response.json();
+            } catch (error) {
+                console.error('Error al actualizar estatus:', error);
+                return { error: error.message };
+            }
+        }
+
+        // Mostrar comandas en el HTML
+        async function displayComandas() {
+            const container = document.getElementById('comandas-container');
+            container.innerHTML = '<div class="loading">Cargando comandas...</div>';
+            
+            const comandas = await fetchComandas();
+            
+            if (comandas.length === 0) {
+                container.innerHTML = '<div class="loading">No hay comandas para mostrar</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            comandas.forEach(comanda => {
+                // Verificar si el ticket existe
+                const ticket = comanda.ticket || {};
+                
+                // Formatear fecha - manejar caso donde fecha no existe
+                let fechaFormateada = 'Fecha no disponible';
+                if (ticket.fecha) {
+                    try {
+                        const fecha = new Date(ticket.fecha);
+                        fechaFormateada = fecha.toLocaleString();
+                    } catch (e) {
+                        console.error('Error formateando fecha:', e);
+                    }
+                }
+                
+                // Crear card
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.setAttribute('data-id', comanda.idComanda);
+                
+                card.innerHTML = `
+                    <div class="status-spinner status-${comanda.estatus}">${statusText[comanda.estatus] || 'Desconocido'}</div>
+                    <div class="card-img"></div>
+                    <div class="card-content">
+                        <h2 class="card-title">Comanda #${comanda.idComanda}</h2>
+                        <p class="card-description">Fecha: ${fechaFormateada}</p>
+                        <p class="card-description">Ticket: ${ticket.ticket || 'N/A'}</p>
+                        
+                        <div class="card-details" id="details-${comanda.idComanda}">
+                            <div class="loading">Cargando detalles...</div>
+                        </div>
+                        
+                        <select class="status-selector" onchange="handleStatusChange(this, ${comanda.idComanda})">
+                            <option value="1" ${comanda.estatus === 1 ? 'selected' : ''}>En proceso</option>
+                            <option value="2" ${comanda.estatus === 2 ? 'selected' : ''}>Terminado</option>
+                            <option value="3" ${comanda.estatus === 3 ? 'selected' : ''}>Entregado</option>
+                            <option value="4" ${comanda.estatus === 4 ? 'selected' : ''}>Cancelado</option>
+                        </select>
+                        
+                        <button class="save-btn" onclick="saveChanges(${comanda.idComanda})">Guardar Cambios</button>
                     </div>
                 `;
-
-                // Detalle
-                const detalleDiv = document.createElement('div');
-                detalleDiv.className = 'detalle';
                 
-                let tablaDetalle = '<table><tr><th>Renglón</th><th>Descripción</th><th>Cantidad</th></tr>';
-                comanda.detalles.forEach(detalle => {
-                    tablaDetalle += `
-                        <tr>
-                            <td>${detalle.renglon}</td>
-                            <td>${detalle.descripcionProducto}</td>
-                            <td>${detalle.cantidad}</td>
-                        </tr>
-                    `;
-                });
-                tablaDetalle += '</table>';
-                detalleDiv.innerHTML = tablaDetalle;
-
-                // Ensamblar comanda
-                comandaDiv.appendChild(encabezadoDiv);
-                comandaDiv.appendChild(detalleDiv);
-                contenedor.appendChild(comandaDiv);
+                container.appendChild(card);
+                
+                // Cargar detalles solo si tenemos idTicket
+                if (ticket.idTicket) {
+                    loadDetails(ticket.idTicket, comanda.idComanda);
+                } else {
+                    const detailsContainer = document.getElementById(`details-${comanda.idComanda}`);
+                    if (detailsContainer) {
+                        detailsContainer.innerHTML = '<p>No se pudo cargar detalles (ID de ticket no disponible)</p>';
+                    }
+                }
             });
         }
 
-        // Actualizar comandas cada 5 segundos
-        obtenerComandas();
-        setInterval(obtenerComandas, 5000);
+    // Cargar detalles de un ticket
+    async function loadDetails(idTicket, idComanda) {
+    const detailsContainer = document.getElementById(`details-${idComanda}`);
+    if (!detailsContainer) return;
+    
+    try {
+        const response = await fetch(`http://localhost:8080/Zarape/api/comanda/getDetails?idTicket=${idTicket}`);
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const detalles = await response.json();
+        
+        if (!Array.isArray(detalles)) {
+            throw new Error('Formato de respuesta inválido');
+        }
+        
+        if (detalles.length === 0) {
+            detailsContainer.innerHTML = '<p>No hay detalles disponibles</p>';
+            return;
+        }
+        
+        let html = '<h3>Detalles:</h3>';
+        detalles.forEach(detalle => {
+            // Usar el nombre del producto si está disponible
+            let productoDesc = detalle.nombreProducto || 
+                             (detalle.idCombo ? `Combo ${detalle.idCombo}` : 
+                             (detalle.idProducto ? `Producto ${detalle.idProducto}` : 'Ítem no identificado'));
+            
+            html += `
+                <div class="detail-item">
+                    <span>${detalle.cantidad || 0} x ${productoDesc}</span>
+                    <span>$${(detalle.precio || 0).toFixed(2)}</span>
+                </div>
+            `;
+        });
+        
+        detailsContainer.innerHTML = html;
+    } catch (error) {
+        console.error('Error al cargar detalles:', error);
+        detailsContainer.innerHTML = `
+            <p style="color: red;">Error al cargar detalles:</p>
+            <p>${error.message}</p>
+        `;
+    }
+}
+
+        // Manejar cambio de estatus (visual)
+        function handleStatusChange(select, idComanda) {
+            const newStatus = parseInt(select.value);
+            const card = document.querySelector(`.card[data-id="${idComanda}"]`);
+            if (!card) return;
+            
+            const statusSpinner = card.querySelector('.status-spinner');
+            if (statusSpinner) {
+                // Actualizar visualmente
+                statusSpinner.className = `status-spinner status-${newStatus}`;
+                statusSpinner.textContent = statusText[newStatus] || 'Desconocido';
+            }
+        }
+
+        // Guardar cambios en el backend
+        async function saveChanges(idComanda) {
+            const card = document.querySelector(`.card[data-id="${idComanda}"]`);
+            if (!card) return;
+            
+            const select = card.querySelector('.status-selector');
+            const saveBtn = card.querySelector('.save-btn');
+            if (!select || !saveBtn) return;
+            
+            const newStatus = parseInt(select.value);
+            
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Guardando...';
+            
+            try {
+                const result = await updateStatus(idComanda, newStatus);
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showSuccess('Estatus actualizado correctamente');
+            } catch (error) {
+                console.error('Error al guardar:', error);
+                showError('Error al actualizar: ' + error.message);
+                
+                // Revertir visualmente
+                const statusSpinner = card.querySelector('.status-spinner');
+                if (statusSpinner) {
+                    const currentStatus = select.getAttribute('data-current-status');
+                    if (currentStatus) {
+                        select.value = currentStatus;
+                        handleStatusChange(select, idComanda);
+                    }
+                }
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Guardar Cambios';
+            }
+        }
+
+        // Mostrar mensaje de error
+        function showError(message) {
+            alert('Error: ' + message);
+        }
+
+        // Mostrar mensaje de éxito
+        function showSuccess(message) {
+            alert('Éxito: ' + message);
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Inicializando vista de comandas...');
+            displayComandas();
+        });
     </script>
 </body>
 </html>

@@ -15,7 +15,15 @@ const ENDPOINTS = {
 // Función genérica para hacer fetch requests
 async function fetchData(endpoint) {
     try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`);
+        
+        const username = localStorage.getItem("nombreUsuario");
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            method: "GET",
+            headers: {
+                "username": username
+            }
+        });
+        
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         return await response.json();
     } catch (error) {
@@ -48,6 +56,8 @@ export async function loadInitialData() {
             listSucursales = sucursales;
             mostrarInactivos();
         }
+        
+        cambioImagen();
     } catch (error) {
         console.error("Error loading initial data:", error);
     } finally {
@@ -120,7 +130,7 @@ export function mostrarInactivos() {
     tableBody.innerHTML = listSucursales
         .filter(registro => mostrarActivos ? registro.activo === 1 : registro.activo === 0)
         .map((registro, index) => `
-            <tr ondblclick="controladorGra1.selectRegistro(${index})">
+            <tr ondblclick="controladorGra1.selectRegistro(${registro.idSucursal})">
                 <td>${registro.nombre}</td>
                 <td>${registro.latitud}</td>
                 <td>${registro.longitud}</td>
@@ -135,28 +145,41 @@ export function mostrarInactivos() {
         `).join('');
 }
 
-// Seleccionar registro con doble click
-export function selectRegistro(indice) {
-    const sucursal = listSucursales[indice];
+export function selectRegistro(sucursald) {
+    let sucursal = listSucursales.filter(elemento => elemento.idSucursal == sucursald);
+    
     if (!sucursal) return;
+
+    sucursal = sucursal[0];
 
     // Llenar formulario
     document.getElementById("idSucursal").value = sucursal.idSucursal;
     document.getElementById("nombre").value = sucursal.nombre;
     document.getElementById("latitud").value = sucursal.latitud;
     document.getElementById("longitud").value = sucursal.longitud;
-    document.getElementById("foto").value = sucursal.foto;
     document.getElementById("urlWeb").value = sucursal.urlWeb;
     document.getElementById("horarios").value = sucursal.horario;
     document.getElementById("calle").value = sucursal.calle;
     document.getElementById("numCalle").value = sucursal.numCalle;
     document.getElementById("colonia").value = sucursal.colonia;
     
-    // Seleccionar estado y ciudad
+    // Manejar la imagen
+    const inputFoto = document.getElementById("foto");
+    if (sucursal.foto) {
+        inputFoto.setAttribute('data-imagen', sucursal.foto);
+        const previewDiv = document.getElementById('imagen-preview');
+        const previewImg = document.getElementById('imagen-preview-img');
+        previewImg.src = `data:image/png;base64,${sucursal.foto}`;
+        previewDiv.style.display = 'block';
+    } else {
+        inputFoto.removeAttribute('data-imagen');
+        document.getElementById('imagen-preview').style.display = 'none';
+    }
+    
+    console.log(sucursal.colonia,sucursal.Ciudad);
     document.getElementById("estados").value = sucursal.Ciudad.estado.idEstado;
     loadCiudades();
     
-    // Timeout para asegurar que las ciudades se cargaron
     setTimeout(() => {
         document.getElementById("Ciudades").value = sucursal.Ciudad.idCiudad;
     }, 100);
@@ -166,28 +189,36 @@ export function selectRegistro(indice) {
 
 // Agregar nueva sucursal
 export async function agregarSucursal() {
+    const inputFoto = document.getElementById("foto");
+    const fotoBase64 = inputFoto.getAttribute('data-imagen') || '';
+    const username = localStorage.getItem("nombreUsuario");
+
     const formData = {
-        idSucursal: document.getElementById("idSucursal").value || -1,
+        idSucursal: parseInt(document.getElementById("idSucursal").value) || -1,
         nombre: document.getElementById("nombre").value,
-        latitud: document.getElementById("latitud").value,
-        longitud: document.getElementById("longitud").value,
-        foto: document.getElementById("foto").value,
+        latitud: parseFloat(document.getElementById("latitud").value),
+        longitud: parseFloat(document.getElementById("longitud").value),
+        foto: fotoBase64, // Usamos el valor de data-imagen
         urlWeb: document.getElementById("urlWeb").value,
-        horario: document.getElementById("horarios").value,
-        calle: document.getElementById("calle").value,
+        horario: document.getElementById("horarios").value.replace(/\+/g, ' '),
+        calle: document.getElementById("calle").value.replace(/\+/g, ' '),
         numCalle: document.getElementById("numCalle").value,
         colonia: document.getElementById("colonia").value,
         activo: 1,
         Ciudad: {
-            idCiudad: document.getElementById("Ciudades").value,
-            nombre: ""
+            idCiudad: parseFloat(document.getElementById("Ciudades").value)
         }
     };
+
+    console.log(formData);
 
     try {
         const response = await fetch(`${API_BASE_URL}${ENDPOINTS.agregarSucursal}`, {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            headers: { 
+                "Content-Type": "application/x-www-form-urlencoded",
+                "username": username
+            },
             body: new URLSearchParams({ datosSucursal: JSON.stringify(formData) })
         });
 
@@ -212,12 +243,16 @@ export async function agregarSucursal() {
 // Eliminar sucursal
 export async function eliminarSucursal() {
     const idSucursal = document.getElementById("idSucursal").value;
+    const username = localStorage.getItem("nombreUsuario");
     if (!idSucursal) return;
 
     try {
         const response = await fetch(`${API_BASE_URL}${ENDPOINTS.eliminarSucursal}`, {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            headers: { 
+                "Content-Type": "application/x-www-form-urlencoded" ,
+                "username": username
+            },
             body: new URLSearchParams({ idSucursal })
         });
 
@@ -246,3 +281,28 @@ function handleResize() {
         barraLateral.classList.toggle("show");
     }
 }
+
+function cambioImagen() {
+    document.getElementById('foto').addEventListener('change', function (e) {
+        const previewDiv = document.getElementById('imagen-preview');
+        const previewImg = document.getElementById('imagen-preview-img');
+        const inputFoto = document.getElementById('foto');
+
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const base64Image = e.target.result.split(',')[1];
+                previewImg.src = e.target.result;
+                inputFoto.setAttribute('data-imagen', base64Image);
+                previewDiv.style.display = 'block';
+            }
+
+            reader.readAsDataURL(this.files[0]);
+        } else {
+            previewDiv.style.display = 'none';
+            inputFoto.removeAttribute('data-imagen');
+        }
+    });
+}
+

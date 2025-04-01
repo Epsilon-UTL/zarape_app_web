@@ -87,7 +87,10 @@
 
                     <div class="row g-1 mb-2">
                         <div class="col-md-6">
-                            <input type="text" id="foto" class="form-control form-control-sm" placeholder="URL Foto" />
+                            <input type="file" id="foto" class="form-control form-control-sm" accept="image/*" />
+                            <div id="imagen-preview" class="mt-1" style="max-width: 100px; display: none;">
+                                <img id="imagen-preview-img" src="#" alt="Vista previa de la imagen" style="max-width: 100%;" />
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <input type="text" id="urlWeb" class="form-control form-control-sm" placeholder="Sitio Web" />
@@ -127,15 +130,16 @@
             </div>
         </div>
     </main>
+
+
+    <script>
+        const menuToggle = document.getElementById("menu-toggle");
+        const content = document.querySelector(".content");
+
+        menuToggle.addEventListener("click", () => {
+            menuLateral.classList.toggle("active");
+            content.classList.toggle("active-main");
+        });
+    </script>
+
 </div>
-
-<script>
-    const menuToggle = document.getElementById("menu-toggle");
-    const menuLateral = document.querySelector(".menu-lateral");
-    const content = document.querySelector(".content");
-
-    menuToggle.addEventListener("click", () => {
-        menuLateral.classList.toggle("active");
-        content.classList.toggle("active-main");
-    });
-</script>

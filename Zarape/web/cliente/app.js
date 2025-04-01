@@ -2,7 +2,7 @@ let servidor = window.location.hostname === 'localhost'
         ? 'http://localhost:8080/Zarape/api/'
         : 'http://192.168.1.8:8080/Zarape/api/';
 let apiAlimentos = 'alimento/getAllAlimento';
-let apiBebidas = 'bebida/getAllBebida';
+let apiBebidas = 'bebida/getAllBd';
 let apiTicket = 'ticket/agregarTicket';
 let apiComanda = 'comanda/agregarComanda';
 
