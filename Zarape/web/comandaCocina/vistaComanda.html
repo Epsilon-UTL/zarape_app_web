@@ -4,197 +4,432 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administrador de Comandas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #FF6D00;
+            --primary-light: #FF9E40;
+            --primary-dark: #E65100;
+            --secondary-color: #4E342E;
+            --light-bg: #FFF8F0;
+            --card-bg: #FFFFFF;
+            --success-color: #2E7D32;
+            --warning-color: #F9A825;
+            --error-color: #C62828;
+            --info-color: #0277BD;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
         }
         
         body {
-            background-color: #FFF8E1; /* Fondo amarillo claro */
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
             padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
         }
         
         h1 {
             text-align: center;
+            margin: 30px 0;
+            color: var(--secondary-color);
+            font-weight: 700;
+            font-size: 2.2rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-light), var(--primary-dark));
+            border-radius: 2px;
+        }
+        
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
-            color: #E65100; /* Naranja oscuro */
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .stats {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            background-color: rgba(255, 109, 0, 0.1);
+            color: var(--primary-dark);
+        }
+        
+        .refresh-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+        
+        .refresh-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
         }
         
         .cards-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
         }
         
         .card {
-            background-color: #FFF3E0; /* Naranja muy claro */
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
             overflow: hidden;
-            width: 300px;
-            transition: transform 0.3s ease;
+            transition: var(--transition);
             position: relative;
-            border: 1px solid #FFB74D; /* Borde naranja claro */
+            border-top: 4px solid var(--primary-color);
         }
         
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(230, 81, 0, 0.2); /* Sombra naranja */
+            box-shadow: 0 8px 16px rgba(230, 81, 0, 0.15);
         }
         
-        .card-img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            background: linear-gradient(45deg, #FFB74D, #FF9800); /* Degradado naranja */
+        .card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+        
+        .card-time {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         
         .card-content {
             padding: 20px;
         }
         
-        .card-title {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            color: #BF360C; /* Naranja oscuro */
-        }
-        
-        .card-description {
-            color: #5D4037; /* Marrón oscuro para contraste */
-            margin-bottom: 10px;
-            line-height: 1.5;
-            font-size: 0.9rem;
-        }
-        
         .card-details {
-            margin-top: 10px;
-            border-top: 1px solid #FFCC80; /* Naranja claro */
-            padding-top: 10px;
+            margin-top: 15px;
+        }
+        
+        .detail-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .detail-list {
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .detail-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .detail-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+        
+        .detail-list::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 3px;
         }
         
         .detail-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.85rem;
-            color: #5D4037; /* Marrón oscuro */
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
         }
         
-        /* Estilos para los spinners de estado */
-        .status-spinner {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: white;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .detail-item:last-child {
+            border-bottom: none;
         }
         
-        .status-1 { /* En proceso */
-            background-color: #945034; /* Ámbar oscuro */
-            animation: pulse 2s infinite;
+        .item-name {
+            flex: 1;
         }
         
-        .status-2 { /* Terminado */
-            background-color: #99BC85; /* Ámbar */
+        .item-price {
+            font-weight: 500;
+            color: var(--secondary-color);
         }
         
-        .status-3 { /* Entregado */
-            background-color: #57B4BA; /* Naranja intenso */
+        .card-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         
-        .status-4 { /* Cancelado */
-            background-color: #5C7285; /* Naranja oscuro */
-            text-decoration: line-through;
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        @keyframes pulse {
-            0% { opacity: 0.9; }
-            50% { opacity: 0.6; }
-            100% { opacity: 0.9; }
+        .status-label {
+            font-size: 0.9rem;
+            font-weight: 500;
         }
         
-        /* Selector de estado */
         .status-selector {
-            margin-top: 10px;
-            width: 100%;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #FFB74D; /* Naranja claro */
-            background-color: #FFF3E0; /* Naranja muy claro */
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: var(--card-bg);
+            color: var(--text-primary);
             cursor: pointer;
-            color: #5D4037; /* Marrón oscuro */
+            transition: var(--transition);
         }
         
         .status-selector:focus {
             outline: none;
-            border-color: #E65100; /* Naranja oscuro */
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 109, 0, 0.2);
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+        
+        .status-1 { /* En proceso */
+            background-color: var(--warning-color);
+        }
+        
+        .status-2 { /* Terminado */
+            background-color: var(--info-color);
+        }
+        
+        .status-3 { /* Entregado */
+            background-color: var(--success-color);
+        }
+        
+        .status-4 { /* Cancelado */
+            background-color: var(--error-color);
         }
         
         .save-btn {
-            display: block;
             width: 100%;
-            background: linear-gradient(to right, #FF9800, #FB8C00); /* Degradado naranja */
+            background-color: var(--primary-color);
             color: white;
             padding: 10px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s;
-            margin-top: 15px;
+            border-radius: var(--border-radius);
             border: none;
+            font-weight: 500;
             cursor: pointer;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(230, 81, 0, 0.3);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .save-btn:hover {
-            background: linear-gradient(to right, #FB8C00, #F57C00); /* Degradado naranja más oscuro */
+            background-color: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(230, 81, 0, 0.3);
         }
         
         .save-btn:active {
             transform: translateY(0);
         }
         
+        .save-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         .loading {
             text-align: center;
-            padding: 20px;
-            font-style: italic;
-            color: #E65100; /* Naranja oscuro */
+            padding: 40px;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 109, 0, 0.1);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            color: var(--primary-light);
+            margin-bottom: 15px;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 500;
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            transform: translateX(200%);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast-success {
+            background-color: var(--success-color);
+        }
+        
+        .toast-error {
+            background-color: var(--error-color);
         }
         
         @media (max-width: 768px) {
-            .cards-container {
+            .header-info {
                 flex-direction: column;
-                align-items: center;
+                gap: 15px;
+                align-items: flex-start;
             }
             
-            .card {
-                width: 90%;
-                max-width: 350px;
+            .stats {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .cards-container {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <h1>Administrador de Comandas</h1>
-    
-    <div class="cards-container" id="comandas-container">
-        <div class="loading">Cargando comandas...</div>
+    <div class="container">
+        <h1><i class="fas fa-clipboard-list"></i> Administrador de Comandas</h1>
+        
+        <div class="header-info">
+            <div class="stats">
+                <div class="stat-item" id="pending-count">
+                    <i class="fas fa-spinner"></i>
+                    <span>0 En proceso</span>
+                </div>
+                <div class="stat-item" id="completed-count">
+                    <i class="fas fa-check-circle"></i>
+                    <span>0 Terminadas</span>
+                </div>
+                <div class="stat-item" id="delivered-count">
+                    <i class="fas fa-truck"></i>
+                    <span>0 Entregadas</span>
+                </div>
+            </div>
+            <button class="refresh-btn" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i>
+                Actualizar
+            </button>
+        </div>
+        
+        <div class="cards-container" id="comandas-container">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Cargando comandas...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message"></span>
     </div>
 
     <script>
@@ -205,6 +440,35 @@
             3: 'Entregado',
             4: 'Cancelado'
         };
+
+        // Mapeo de estatus a iconos
+        const statusIcons = {
+            1: 'fas fa-spinner fa-pulse',
+            2: 'fas fa-check-circle',
+            3: 'fas fa-truck',
+            4: 'fas fa-times-circle'
+        };
+
+        // Mostrar notificación toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toast.className = `toast toast-${type}`;
+            toastMessage.textContent = message;
+            
+            // Icono según el tipo
+            const icon = toast.querySelector('i');
+            icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            
+            // Mostrar toast
+            toast.classList.add('show');
+            
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
 
         // Obtener comandas desde el backend
         async function fetchComandas() {
@@ -218,7 +482,7 @@
                 return Array.isArray(data) ? data : [];
             } catch (error) {
                 console.error('Error al obtener comandas:', error);
-                showError('Error al cargar comandas');
+                showToast('Error al cargar comandas', 'error');
                 return [];
             }
         }
@@ -237,21 +501,57 @@
                 return await response.json();
             } catch (error) {
                 console.error('Error al actualizar estatus:', error);
-                return { error: error.message };
+                throw error;
             }
+        }
+
+        // Actualizar contadores de estado
+        function updateStatusCounters(comandas) {
+            const counts = {
+                1: 0, // En proceso
+                2: 0, // Terminado
+                3: 0  // Entregado
+            };
+            
+            comandas.forEach(comanda => {
+                if (comanda.estatus in counts) {
+                    counts[comanda.estatus]++;
+                }
+            });
+            
+            document.getElementById('pending-count').querySelector('span').textContent = `${counts[1]} En proceso`;
+            document.getElementById('completed-count').querySelector('span').textContent = `${counts[2]} Terminadas`;
+            document.getElementById('delivered-count').querySelector('span').textContent = `${counts[3]} Entregadas`;
         }
 
         // Mostrar comandas en el HTML
         async function displayComandas() {
             const container = document.getElementById('comandas-container');
-            container.innerHTML = '<div class="loading">Cargando comandas...</div>';
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Cargando comandas...</p>
+                </div>
+            `;
             
             const comandas = await fetchComandas();
             
             if (comandas.length === 0) {
-                container.innerHTML = '<div class="loading">No hay comandas para mostrar</div>';
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-clipboard"></i>
+                        </div>
+                        <h3>No hay comandas para mostrar</h3>
+                        <p>Actualmente no hay comandas pendientes o en proceso.</p>
+                    </div>
+                `;
+                updateStatusCounters([]);
                 return;
             }
+            
+            // Actualizar contadores
+            updateStatusCounters(comandas);
             
             container.innerHTML = '';
             
@@ -264,7 +564,13 @@
                 if (ticket.fecha) {
                     try {
                         const fecha = new Date(ticket.fecha);
-                        fechaFormateada = fecha.toLocaleString();
+                        fechaFormateada = fecha.toLocaleString('es-MX', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
                     } catch (e) {
                         console.error('Error formateando fecha:', e);
                     }
@@ -276,14 +582,27 @@
                 card.setAttribute('data-id', comanda.idComanda);
                 
                 card.innerHTML = `
-                    <div class="status-spinner status-${comanda.estatus}">${statusText[comanda.estatus] || 'Desconocido'}</div>
-                    <div class="card-img"></div>
+                    <div class="card-header">
+                        <h3 class="card-title">Comanda #${comanda.idComanda}</h3>
+                        <div class="card-time">
+                            <i class="far fa-clock"></i>
+                            <span>${fechaFormateada}</span>
+                        </div>
+                    </div>
+                    
                     <div class="card-content">
-                        <h2 class="card-title">Comanda #${comanda.idComanda}</h2>
-                        <p class="card-description">Fecha: ${fechaFormateada}</p>
-                        
                         <div class="card-details" id="details-${comanda.idComanda}">
-                            <div class="loading">Cargando detalles...</div>
+                            <div class="loading-spinner" style="width: 30px; height: 30px; margin: 10px auto;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <div class="status-container">
+                            <span class="status-label">Estado:</span>
+                            <span class="status-badge status-${comanda.estatus}">
+                                <i class="${statusIcons[comanda.estatus]}"></i>
+                                ${statusText[comanda.estatus] || 'Desconocido'}
+                            </span>
                         </div>
                         
                         <select class="status-selector" onchange="handleStatusChange(this, ${comanda.idComanda})">
@@ -293,7 +612,10 @@
                             <option value="4" ${comanda.estatus === 4 ? 'selected' : ''}>Cancelado</option>
                         </select>
                         
-                        <button class="save-btn" onclick="saveChanges(${comanda.idComanda})">Guardar Cambios</button>
+                        <button class="save-btn" onclick="saveChanges(${comanda.idComanda})">
+                            <i class="fas fa-save"></i>
+                            Guardar Cambios
+                        </button>
                     </div>
                 `;
                 
@@ -334,27 +656,49 @@
                     return;
                 }
                 
-                let html = '<h3 style="color: #E65100;">Detalles:</h3>';
+                let html = `
+                    <div class="detail-title">
+                        <i class="fas fa-utensils"></i>
+                        <span>Detalles del Pedido</span>
+                    </div>
+                    <ul class="detail-list">
+                `;
+                
+                let total = 0;
+                
                 detalles.forEach(detalle => {
                     // Usar el nombre del producto si está disponible
                     let productoDesc = detalle.nombreProducto || 
                                     (detalle.idCombo ? `Combo ${detalle.idCombo}` : 
                                     (detalle.idProducto ? `Producto ${detalle.idProducto}` : 'Ítem no identificado'));
                     
+                    const subtotal = (detalle.precio || 0) * (detalle.cantidad || 1);
+                    total += subtotal;
+                    
                     html += `
-                        <div class="detail-item">
-                            <span>${detalle.cantidad || 0} x ${productoDesc}</span>
-                            <span>$${(detalle.precio || 0).toFixed(2)}</span>
-                        </div>
+                        <li class="detail-item">
+                            <span class="item-name">${detalle.cantidad || 1} x ${productoDesc}</span>
+                            <span class="item-price">$${subtotal.toFixed(2)}</span>
+                        </li>
                     `;
                 });
+                
+                html += `
+                    </ul>
+                    <div class="detail-item" style="font-weight: 600; margin-top: 10px;">
+                        <span class="item-name">Total:</span>
+                        <span class="item-price">$${total.toFixed(2)}</span>
+                    </div>
+                `;
                 
                 detailsContainer.innerHTML = html;
             } catch (error) {
                 console.error('Error al cargar detalles:', error);
                 detailsContainer.innerHTML = `
-                    <p style="color: #D84315;">Error al cargar detalles:</p>
-                    <p>${error.message}</p>
+                    <p style="color: var(--error-color);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Error al cargar detalles: ${error.message}
+                    </p>
                 `;
             }
         }
@@ -365,11 +709,14 @@
             const card = document.querySelector(`.card[data-id="${idComanda}"]`);
             if (!card) return;
             
-            const statusSpinner = card.querySelector('.status-spinner');
-            if (statusSpinner) {
+            const statusBadge = card.querySelector('.status-badge');
+            if (statusBadge) {
                 // Actualizar visualmente
-                statusSpinner.className = `status-spinner status-${newStatus}`;
-                statusSpinner.textContent = statusText[newStatus] || 'Desconocido';
+                statusBadge.className = `status-badge status-${newStatus}`;
+                statusBadge.innerHTML = `
+                    <i class="${statusIcons[newStatus]}"></i>
+                    ${statusText[newStatus] || 'Desconocido'}
+                `;
             }
         }
 
@@ -383,51 +730,62 @@
             if (!select || !saveBtn) return;
             
             const newStatus = parseInt(select.value);
+            const currentStatus = card.querySelector('.status-badge').className.match(/status-(\d)/)[1];
+            
+            // Si no hay cambio, no hacer nada
+            if (parseInt(currentStatus) === newStatus) {
+                showToast('No se detectaron cambios en el estado', 'error');
+                return;
+            }
             
             saveBtn.disabled = true;
-            saveBtn.textContent = 'Guardando...';
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Guardando...';
             
             try {
-                const result = await updateStatus(idComanda, newStatus);
+                await updateStatus(idComanda, newStatus);
+                showToast('Estado actualizado correctamente');
                 
-                if (result.error) {
-                    throw new Error(result.error);
-                }
-                
-                showSuccess('Estatus actualizado correctamente');
+                // Actualizar contadores
+                const comandas = await fetchComandas();
+                updateStatusCounters(comandas);
             } catch (error) {
                 console.error('Error al guardar:', error);
-                showError('Error al actualizar: ' + error.message);
+                showToast('Error al actualizar: ' + error.message, 'error');
                 
                 // Revertir visualmente
-                const statusSpinner = card.querySelector('.status-spinner');
-                if (statusSpinner) {
-                    const currentStatus = select.getAttribute('data-current-status');
-                    if (currentStatus) {
-                        select.value = currentStatus;
-                        handleStatusChange(select, idComanda);
-                    }
+                const statusBadge = card.querySelector('.status-badge');
+                if (statusBadge) {
+                    statusBadge.className = `status-badge status-${currentStatus}`;
+                    statusBadge.innerHTML = `
+                        <i class="${statusIcons[currentStatus]}"></i>
+                        ${statusText[currentStatus] || 'Desconocido'}
+                    `;
+                    select.value = currentStatus;
                 }
             } finally {
                 saveBtn.disabled = false;
-                saveBtn.textContent = 'Guardar Cambios';
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
             }
         }
 
-        // Mostrar mensaje de error
-        function showError(message) {
-            alert('Error: ' + message);
-        }
-
-        // Mostrar mensaje de éxito
-        function showSuccess(message) {
-            alert('Éxito: ' + message);
+        // Refrescar datos
+        async function refreshData() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Actualizando...';
+            
+            await displayComandas();
+            
+            refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar';
+            showToast('Datos actualizados');
         }
 
         // Inicializar
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Inicializando vista de comandas...');
             displayComandas();
+            
+            // Opcional: Actualizar automáticamente cada 30 segundos
+            setInterval(refreshData, 30000);
         });
     </script>
 </body>
