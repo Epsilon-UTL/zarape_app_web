@@ -95,7 +95,7 @@ function cargarServicioEmpleado() {
                 loadEmpleado();
                 loadEstados();
                 loadCiudades();
-                SelectSucursales();
+                loadSucursales();
             });
 
             const existingLink = document.querySelector('link[href="inicio/css-inicio.css"]');

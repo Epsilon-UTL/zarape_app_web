@@ -264,3 +264,24 @@ document.addEventListener("DOMContentLoaded", function() {
     loadCategoriaBd();
     loadBebida();
 });
+
+export function cerrarSesion() {
+    const nombreUsuario = localStorage.getItem('nombreUsuario');
+    if (!nombreUsuario) return;
+
+    const url = new URL('http://localhost:8080/Zarape/api/login/cerrarsesion');
+    url.search = new URLSearchParams({ 'nombre': nombreUsuario });
+
+    fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    })
+        .then(response => response.ok ? response.json() : Promise.reject('Error al cerrar sesión'))
+        .finally(() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('nombreUsuario');
+            alert("Cerrando sesión");
+            loadLogin();
+        })
+        .catch(error => console.error('Error:', error));
+}
