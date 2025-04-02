@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.sql.ResultSet; 
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.PreparedStatement;
@@ -16,23 +16,22 @@ import org.utl.dsm403.zarape.model.Persona;
 import org.utl.dsm403.zarape.model.Sucursal;
 import org.utl.dsm403.zarape.model.Usuario;
 
-
 public class ControllerEmpleado {
-    
-    public boolean validarToken(String nombreUsuario) throws SQLException {
-    String sql = "SELECT 1 FROM usuario WHERE nombre = ? AND lastToken IS NOT NULL"; 
-    ConexionMySQL objConMySQL = new ConexionMySQL();
 
-    try (Connection conn = objConMySQL.open()) {
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        pstmt.setString(1, nombreUsuario);
-        ResultSet rs = pstmt.executeQuery();
-        return rs.next(); 
-    } catch (SQLException ex) {
-        ex.printStackTrace();
-        return false;
+    public boolean validarToken(String nombreUsuario) throws SQLException {
+        String sql = "SELECT 1 FROM usuario WHERE nombre = ? AND lastToken IS NOT NULL";
+        ConexionMySQL objConMySQL = new ConexionMySQL();
+
+        try (Connection conn = objConMySQL.open()) {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, nombreUsuario);
+            ResultSet rs = pstmt.executeQuery();
+            return rs.next();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        }
     }
-}
 
     public Empleado add(Empleado e) throws SQLException {
         String sql = "CALL insertarEmpleado( ?,?,?,?,?,?,?,"
@@ -67,10 +66,10 @@ public class ControllerEmpleado {
 
         return e;
     }
-    
-        public Empleado update(Empleado e) throws SQLException {
+
+    public Empleado update(Empleado e) throws SQLException {
         String sql = "{CALL actualizarEmpleado(?,?,?,?,?,?,?,?,?,?)};";
-        
+
         ConexionMySQL connMySQL = new ConexionMySQL();
         Connection conn = connMySQL.open();
 
@@ -93,34 +92,33 @@ public class ControllerEmpleado {
 
         return e;
     }
-        
-    public String delete(int idEmpleado) throws SQLException{
-        
+
+    public String delete(int idEmpleado) throws SQLException {
+
         String sql = "CALL eliminarEmpleado(?);";
         ConexionMySQL connMySQL = new ConexionMySQL();
         Connection conn = connMySQL.open();
-        
+
         CallableStatement csmt = conn.prepareCall(sql);
         csmt.setInt(1, idEmpleado);
         csmt.executeQuery();
-        
+
         csmt.close();
         connMySQL.close();
-        
+
         return "Se elimino el empleado " + idEmpleado;
     }
-    
-    public List<Empleado> getAll() throws SQLException
-    {
+
+    public List<Empleado> getAll() throws SQLException {
         List<Empleado> empleado = new ArrayList<>();
-            String sql = """
+        String sql = """
                 SELECT 
                 e.idEmpleado, e.activo estatus, 
                 p.idPersona, p.nombre, p.apellidos, p.telefono, 
                 c.nombre ciudad, c.idCiudad, 
                 es.nombre estado, es.idEstado,
                 s.nombre sucursal, s.idsucursal,
-                u.nombre username, u.contrasenia contrasenia, u.idUsuario, u.activo
+                u.nombre username, u.contrasenia as contra, AES_DECRYPT(u.contrasenia, '256') contrasenia, u.idUsuario, u.activo
                 FROM empleado e
                 INNER JOIN persona p ON p.idPersona = e.idPersona
                 INNER JOIN sucursal s ON e.idSucursal = s.idSucursal
@@ -128,16 +126,16 @@ public class ControllerEmpleado {
                 INNER JOIN ciudad c ON c.idCiudad = p.idCiudad
                 INNER JOIN estado es ON es.idEstado = c.idEstado;
                 """;
-        
+
         ConexionMySQL connMySQL = new ConexionMySQL();
-        
+
         Connection conn = connMySQL.open();
-        
+
         PreparedStatement pstmt = conn.prepareStatement(sql);
-        
+
         ResultSet rs = pstmt.executeQuery();
-        
-        while (rs.next()) {            
+
+        while (rs.next()) {
             empleado.add(fill(rs));
         }
         rs.close();
@@ -145,7 +143,7 @@ public class ControllerEmpleado {
         connMySQL.close();
         return empleado;
     }
-    
+
     private Empleado fill(ResultSet rs) throws SQLException {
         Empleado empleado = new Empleado();
         Persona persona = new Persona();
@@ -153,36 +151,36 @@ public class ControllerEmpleado {
         Estado estado = new Estado();
         Usuario usuario = new Usuario();
         Sucursal sucursal = new Sucursal();
-        
+
         persona.setIdPersona(rs.getInt("idPersona"));
-        persona.setNombre(rs.getString("nombre")); 
+        persona.setNombre(rs.getString("nombre"));
         persona.setApellidos(rs.getString("apellidos"));
         persona.setTelefono(rs.getString("telefono"));
-        
+
         ciudad.setidCiudad(rs.getInt("idCiudad"));
         ciudad.setNombre(rs.getString("ciudad"));
-        
+
         estado.setIdEstado(rs.getInt("idEstado"));
         estado.setNombre(rs.getString("estado"));
-        
-        ciudad.setEstado(estado); 
-        persona.setCiudad(ciudad); 
+
+        ciudad.setEstado(estado);
+        persona.setCiudad(ciudad);
 
         empleado.setIdEmpleado(rs.getInt("idEmpleado"));
         empleado.setActivo(rs.getInt("estatus"));
-        
+
         empleado.setPersona(persona);
 
         usuario.setNombre(rs.getString("username"));
         usuario.setContrasenia(rs.getString("contrasenia"));
         usuario.setActivo(rs.getInt("activo"));
         usuario.setIdUsuario(rs.getInt("idUsuario"));
-        
+
         empleado.setUsuario(usuario);
 
         sucursal.setIdSucursal(rs.getInt("idSucursal"));
         sucursal.setNombre(rs.getString("sucursal"));
-        
+
         empleado.setSucursal(sucursal);
 
         return empleado;

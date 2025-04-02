@@ -14,11 +14,6 @@ import java.sql.PreparedStatement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.utl.dsm403.zarape.model.Ciudad;
-import org.utl.dsm403.zarape.model.Empleado;
-import org.utl.dsm403.zarape.model.Estado;
-import org.utl.dsm403.zarape.model.Persona;
-import org.utl.dsm403.zarape.model.Sucursal;
 import org.utl.dsm403.zarape.model.Usuario;
 
 /**

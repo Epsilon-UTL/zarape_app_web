@@ -3,11 +3,22 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/src/java/org/utl/dsm403/rest/RESTComanda.java</file>
-            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/cliente/app.js</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/modulos/moduloCliente/controladorCliente.js</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/comandaCocina/comandas.css</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/modulos/moduloBebida/controladorBebida.js</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/comandaCliente/controladorComandaCliente.js</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/src/java/org/utl/dsm403/rest/RESTCliente.java</file>
             <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/comandaCocina/controladorComanda.js</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/src/java/org/utl/dsm403/rest/RESTSucursal.java</file>
             <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/comandaCocina/vistaComanda.html</file>
-            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/src/java/org/utl/dsm403/rest/RESTBebida.java</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/js/main.js</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/comandaCliente/vistaComandaCliente.html</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/modulos/moduloEmpleado/controladorEmpleado.js</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/src/java/org/utl/dsm403/rest/RESTLogin.java</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/Login/Login.js</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/comandaCliente/comandaCliente.css</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/modulos/moduloAlimento/controladorAlimento.js</file>
+            <file>file:/C:/Users/rodri/Desktop/Zarape/zarape_app_web/Zarape/web/modulos/moduloCliente/vistaCliente.html</file>
         </group>
     </open-files>
 </project-private>

@@ -140,13 +140,18 @@ export function loadSucursales() {
     });
 }
 
-fetch('http://localhost:8080/Zarape/api/sucursales/getAllSucursales')
-    .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
-    .then(datos => {
-        listSucursales = datos;
-        loadSucursales();
-    })
-    .catch(error => console.error("Error al cargar las sucursales:", error));
+fetch('http://localhost:8080/Zarape/api/sucursales/getAllSucursales', {
+    method: 'GET',
+    headers: {
+        "username": localStorage.getItem("nombreUsuario")   
+    }
+})
+.then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
+.then(datos => {
+    listSucursales = datos;
+    loadSucursales();
+})
+.catch(error => console.error("Error al cargar las sucursales:", error));
 
 export function mostrarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");

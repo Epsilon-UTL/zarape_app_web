@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <div class="content" onload="controladorGra1.loadCategoriaAlm();">
 
         <!-- Menú lateral -->
@@ -15,7 +17,7 @@
             </div>
                 <i class="fa-solid fa-house fa-2xl" onclick="loadInicio();"></i><br>
                 <span>Inicio</span>
-                <i class="fas fa-power-off fa-2xl mt-3" onclick="cerrarSesion();"></i><br>
+                <i class="fas fa-power-off fa-2xl mt-3" onclick="controladorGra1.cerrarSesion();"></i><br>
                 <span>Cerrar Sesión</span>
         </div>
 
@@ -64,12 +66,24 @@
           </select>
         </div>
         <div class="col-md-6 col-sm-12">
-              <input type="text" id="foto" class="form-control" placeholder="Foto" />
+<input 
+    type="file" 
+    id="foto" 
+    class="form-control" 
+    accept="image/*" 
+    onchange="controladorGra1.cargarFotografia();"
+    />
+<img id="imgFoto" width="100" class="mt-2" />
+<textarea id="txtaFotoNuevaAlimento" class="d-none"></textarea>
+
         </div>
       </div>
-      <button type="button" class="btn w-20 mb-2" style="background-color: #D00303; color: white; font-weight: bold" onclick="controladorGra1.agregarAlimento();">Guardar</button>
-      <button id="btn-eliminar" type="button" class="btn w-20 mb-2" style="background-color: #FA4032; color: white; font-weight: bold" onclick="controladorGra1.eliminarAlimento();">Eliminar</button>
-      <button type="button" class="btn w-20 mb-2" style="background-color: #FAAF08; color: white; font-weight: bold" onclick="controladorGra1.cancelarFormulario()">Cancelar</button>
+      <button type="button" class="btn w-20 mb-2" style="background-color: #D00303; color: white; font-weight: bold" 
+        onclick="controladorGra1.agregarAlimento();" id="btn-guardar">Guardar</button>
+<button id="btn-eliminar" type="button" class="btn w-20 mb-2" style="background-color: #FA4032; color: white; font-weight: bold" 
+        onclick="controladorGra1.eliminarAlimento();">Eliminar</button>
+<button type="button" class="btn w-20 mb-2" style="background-color: #FAAF08; color: white; font-weight: bold" 
+        onclick="controladorGra1.cancelarFormulario()">Cancelar</button>
     </form>
   </div>
 
