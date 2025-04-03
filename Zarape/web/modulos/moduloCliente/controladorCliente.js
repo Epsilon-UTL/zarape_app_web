@@ -455,17 +455,6 @@ export async function eliminarCliente() {
     }
 }
 
-// Mostrar/ocultar loader
-function showLoader() {
-    const loader = document.getElementById("loader");
-    if (loader) loader.classList.remove("d-none");
-}
-
-function hideLoader() {
-    const loader = document.getElementById("loader");
-    if (loader) loader.classList.add("d-none");
-}
-
 // Cerrar sesión
 export function cerrarSesion() {
     const nombreUsuario = localStorage.getItem('nombreUsuario');

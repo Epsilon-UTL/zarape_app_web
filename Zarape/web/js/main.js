@@ -145,10 +145,6 @@ function cargarServicioCliente() {
                 window.loadCiudades = controller.loadCiudades;
                 
                 controller.loadInitialData();
-                
-                loadCliente();
-                loadEstados();
-                loadCiudades();
             });
 
             const existingLink = document.querySelector('link[href="inicio/css-inicio.css"]');
