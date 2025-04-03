@@ -88,10 +88,8 @@ function cargarServicioEmpleado() {
                 window.loadCiudades = controller.loadCiudades;
                 window.SelectSucursales = controller.SelectSucursales;
                 
-                // Inicializar validaciones
-                controller.inicializarValidaciones();
+                controller.loadInitialData();
                 
-                // Cargar datos
                 loadEmpleado();
                 loadEstados();
                 loadCiudades();
@@ -146,10 +144,8 @@ function cargarServicioCliente() {
                 window.loadEstados = controller.loadEstados;
                 window.loadCiudades = controller.loadCiudades;
                 
-                // Inicializar validaciones
-                controller.inicializarValidaciones();
+                controller.loadInitialData();
                 
-                // Cargar datos
                 loadCliente();
                 loadEstados();
                 loadCiudades();

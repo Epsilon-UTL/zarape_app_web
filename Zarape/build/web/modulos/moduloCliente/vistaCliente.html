@@ -45,7 +45,8 @@
           <label for="nombre">Nombre</label>
             <input type="text" id="nombre" class="form-control" 
                    placeholder="Ej: Juan (solo letras, sin acentos)" 
-                   data-original-placeholder="Ej: Juan (solo letras, sin acentos)" />          
+                   pattern="[a-zA-ZÁ-ÿ\s'-]{1,45}"
+                   title="Solo letras y espacios, máximo 45 caracteres" required />        
             <div id="error-nombre"></div>
         </div>
       </div>
@@ -54,27 +55,30 @@
           <label for="apellidos">Apellidos</label>
             <input type="text" id="apellidos" class="form-control" 
                    placeholder="Ej: Pérez López (solo letras, sin acentos)" 
-                   data-original-placeholder="Ej: Pérez López (solo letras, sin acentos)" />          
+                   data-original-placeholder="Ej: Pérez López (solo letras, sin acentos)"
+                   pattern="[a-zA-ZÁ-ÿ\s'-]{1,45}"
+                   title="Solo letras y espacios, máximo 45 caracteres" required />          
             <div id="error-apellidos"></div>
         </div>
         <div class="col-md-6 col-sm-12">
           <label for="telefono">Teléfono</label>
             <input type="tel" id="telefono" class="form-control" 
                    placeholder="Ej: 5512345678 (10 dígitos exactos)" 
-                   data-original-placeholder="Ej: 5512345678 (10 dígitos exactos)" />
+                   pattern="\d{10}"
+                   title="Debe contener exactamente 10 dígitos" required />
             <div id="error-telefono"></div>
         </div>
       </div>
       <div class="row mb-2">
         <div class="col-md-6 col-sm-12">
           <label for="estados">Estado</label>
-          <select id="estados" class="form-control" onchange="controladorGra1.loadCiudades();">
+          <select id="estados" class="form-control" onchange="controladorGra1.loadCiudades();" required>
             <!-- Opciones de estados se cargarán aquí -->
           </select>
         </div>
         <div class="col-md-6 col-sm-12">
           <label for="ciudades">Ciudad</label>
-          <select id="ciudades" class="form-control">
+          <select id="ciudades" class="form-control" required>
             <!-- Opciones de ciudades se cargarán aquí -->
           </select>
         </div>
@@ -83,17 +87,18 @@
         <div class="col-md-6 col-sm-12">
           <label for="usuario">Nombre de Usuario</label>
             <input type="text" id="usuario" class="form-control" 
-                   placeholder="Ej: usuario@" 
-                   data-original-placeholder="Ej: usuario@" />
+                  placeholder="Ej: usuario@" 
+                  pattern="[a-zA-Z@]{5,30}"
+                  title="5-30 caracteres con exactamente un @" required />
             <div id="error-usuario"></div>
         </div>
         <div class="col-md-6 col-sm-12">
-          <label for="contrasenia">Contraseña</label>
-            <input type="password" id="contrasenia" class="form-control" 
-                   placeholder="Ej: Pass@123" 
-                   data-original-placeholder="Ej: Pass@123" />
-            <div id="error-contrasenia"></div>
-        </div>
+        <label for="contrasenia">Contraseña</label>
+        <input type="password" id="contrasenia" class="form-control" 
+               placeholder="Ej: Pass@123 (requerido)" 
+               data-original-placeholder="Ej: Pass@123 (requerido)" />
+        <div id="error-contrasenia" class="text-danger small mt-1"></div>
+      </div>
       </div>
       <div class="row mb-2">
       </div>
