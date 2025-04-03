@@ -3,20 +3,20 @@
 
     <!-- Menú lateral -->
     <div class="menu-lateral" id="menuLateral">
-        <button type="button" class="btn btn-block botonLateral mt-2 p-1" onclick="cargarServicioSucursal();">Sucursal</button>
-        <button type="button" class="btn btn-block botonLateral p-1" onclick="cargarServicioEmpleado();">Empleado</button>
-        <button type="button" class="btn btn-block botonLateral p-1" onclick="cargarServicioAlimento();">Alimento</button>
-        <button type="button" class="btn btn-block botonLateral p-1" onclick="cargarServicioBebida();">Bebida</button>
-        <button type="button" class="btn btn-block botonLateral p-1" onclick="cargarServicioCliente();">Cliente</button>
+        <button type="button" class="btn btn-block botonLateral mt-3" onclick="cargarServicioSucursal();">Sucursal</button>
+        <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioEmpleado();">Empleado</button>
+        <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioAlimento();">Alimento</button>
+        <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioBebida();">Bebida</button>
+        <button type="button" class="btn btn-block botonLateral" onclick="cargarServicioCliente();">Cliente</button>
 
-        <div class="form-check form-switch mt-2 ps-0">
-            <input class="form-check-input ms-0" type="checkbox" role="switch" id="activos" checked onchange="controladorGra1.mostrarInactivos()"/>
-            <label class="form-check-label small" for="activos">Activos</label>
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="activos" checked onchange="controladorGra1.mostrarInactivos()"/>
+            <label class="form-check-label" for="activos">Activos</label>
         </div>
-        <i class="fa-solid fa-house fa-lg mt-2" onclick="loadInicio();"></i><br>
-        <span class="small">Inicio</span>
-        <i class="fas fa-power-off fa-lg mt-2" onclick="cerrarSesion();"></i><br>
-        <span class="small">Cerrar Sesión</span>
+        <i class="fa-solid fa-house fa-2xl" onclick="loadInicio();"></i><br>
+        <span>Inicio</span>
+        <i class="fas fa-power-off fa-2xl mt-3" onclick="controladorGra1.cerrarSesion();"></i><br>
+        <span>Cerrar Sesión</span>
     </div>
 
     <!-- Contenido principal -->
@@ -44,33 +44,43 @@
 
                     <div class="row g-1 mb-1">
                         <div class="col-md-6">
-                            <input type="text" id="nombre" class="form-control form-control-sm" placeholder="Nombre" />
+                            <input type="text" id="nombre" class="form-control form-control-sm" placeholder="Nombre" 
+                                   pattern="[A-Za-zÁ-ÿ0-9\s.,'-]{1,65}" 
+                                   title="Máximo 65 caracteres alfanuméricos y espacios" required />
                         </div>
                         <div class="col-md-6">
-                            <input type="text" id="horarios" class="form-control form-control-sm" placeholder="Horarios" />
+                            <input type="text" id="horarios" class="form-control form-control-sm" placeholder="Horarios" 
+                                   pattern=".{1,255}" 
+                                   title="Máximo 255 caracteres" required />
                         </div>
                     </div>
 
                     <div class="row g-1 mb-1">
                         <div class="col-md-4">
-                            <input type="text" id="calle" class="form-control form-control-sm" placeholder="Calle" />
+                            <input type="text" id="calle" class="form-control form-control-sm" placeholder="Calle" 
+                                   pattern="[A-Za-zÁ-ÿ0-9\s.,'-]{1,65}" 
+                                   title="Máximo 65 caracteres alfanuméricos y espacios" required />
                         </div>
                         <div class="col-md-2">
-                            <input type="text" id="numCalle" class="form-control form-control-sm" placeholder="Núm" />
+                            <input type="text" id="numCalle" class="form-control form-control-sm" placeholder="Núm" 
+                                   pattern="[A-Za-z0-9\s-]{1,65}" 
+                                   title="Máximo 65 caracteres alfanuméricos" required />
                         </div>
                         <div class="col-md-6">
-                            <input type="text" id="colonia" class="form-control form-control-sm" placeholder="Colonia" />
+                            <input type="text" id="colonia" class="form-control form-control-sm" placeholder="Colonia" 
+                                   pattern="[A-Za-zÁ-ÿ0-9\s.,'-]{1,65}" 
+                                   title="Máximo 65 caracteres alfanuméricos y espacios" required />
                         </div>
                     </div>
 
                     <div class="row g-1 mb-1">
                         <div class="col-md-6">
-                            <select id="estados" class="form-select form-select-sm" onchange="controladorGra1.loadCiudades();">
+                            <select id="estados" class="form-select form-select-sm" onchange="controladorGra1.loadCiudades();" required>
                                 <!-- Estados -->
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <select id="Ciudades" class="form-select form-select-sm">
+                            <select id="Ciudades" class="form-select form-select-sm" required>
                                 <!-- Ciudades -->
                             </select>
                         </div>
@@ -78,22 +88,29 @@
 
                     <div class="row g-1 mb-1">
                         <div class="col-md-6">
-                            <input type="text" id="latitud" class="form-control form-control-sm" placeholder="Latitud" />
+                            <input type="text" id="latitud" class="form-control form-control-sm" placeholder="Latitud" 
+                                   pattern="-?\d{1,3}\.\d+" 
+                                   title="Formato de latitud válido (ej. 19.4326 o -33.8688)" required />
                         </div>
                         <div class="col-md-6">
-                            <input type="text" id="longitud" class="form-control form-control-sm" placeholder="Longitud" />
+                            <input type="text" id="longitud" class="form-control form-control-sm" placeholder="Longitud" 
+                                   pattern="-?\d{1,3}\.\d+" 
+                                   title="Formato de longitud válido (ej. -99.1332 o 151.2093)" required />
                         </div>
                     </div>
 
                     <div class="row g-1 mb-2">
                         <div class="col-md-6">
-                            <input type="file" id="foto" class="form-control form-control-sm" accept="image/*" />
+                            <input type="file" id="foto" class="form-control form-control-sm" accept="image/*" 
+                                   title="Seleccione una imagen" />
                             <div id="imagen-preview" class="mt-1" style="max-width: 100px; display: none;">
                                 <img id="imagen-preview-img" src="#" alt="Vista previa de la imagen" style="max-width: 100%;" />
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" id="urlWeb" class="form-control form-control-sm" placeholder="Sitio Web" />
+                            <input type="text" id="urlWeb" class="form-control form-control-sm" placeholder="Sitio Web" 
+                                   pattern="https?://.+" 
+                                   title="Ingrese una URL válida (debe comenzar con http:// o https://)" />
                         </div>
                     </div>
 

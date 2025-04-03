@@ -58,6 +58,7 @@ export async function loadInitialData() {
         }
         
         cambioImagen();
+        setupRealTimeValidation();
     } catch (error) {
         console.error("Error loading initial data:", error);
     } finally {
@@ -189,6 +190,12 @@ export function selectRegistro(sucursald) {
 
 // Agregar nueva sucursal
 export async function agregarSucursal() {
+    
+    if (!validateForm()) {
+        alert('Por favor complete correctamente todos los campos requeridos.');
+        return;
+    }
+    
     const inputFoto = document.getElementById("foto");
     const fotoBase64 = inputFoto.getAttribute('data-imagen') || '';
     const username = localStorage.getItem("nombreUsuario");
@@ -306,3 +313,112 @@ function cambioImagen() {
     });
 }
 
+function setupRealTimeValidation() {
+    const form = document.getElementById('form-agregar');
+    const inputs = form.querySelectorAll('input, select');
+    
+    inputs.forEach(input => {
+        input.addEventListener('blur', validateField);
+        
+        if (input.type !== 'file' && input.type !== 'hidden' && input.tagName !== 'SELECT') {
+            input.addEventListener('input', validateField);
+        }
+    });
+}
+
+function validateField(e) {
+    const field = e.target;
+    const errorElementId = `${field.id}-error`;
+    let errorElement = document.getElementById(errorElementId);
+    
+    if (!errorElement) {
+        errorElement = document.createElement('div');
+        errorElement.id = errorElementId;
+        errorElement.className = 'text-danger small mt-1';
+        field.parentNode.appendChild(errorElement);
+    }
+    
+    let isValid = true;
+    let errorMessage = '';
+    
+    switch(field.id) {
+        case 'nombre':
+        case 'calle':
+        case 'colonia':
+            isValid = /^[A-Za-zÁ-ÿ0-9\s.,'-]{1,65}$/.test(field.value);
+            errorMessage = isValid ? '' : 'Máximo 65 caracteres alfanuméricos y espacios permitidos';
+            break;
+            
+        case 'horarios':
+            isValid = field.value.length <= 255;
+            errorMessage = isValid ? '' : 'Máximo 255 caracteres permitidos';
+            break;
+            
+        case 'numCalle':
+            isValid = /^[A-Za-z0-9\s-]{1,65}$/.test(field.value);
+            errorMessage = isValid ? '' : 'Máximo 65 caracteres alfanuméricos permitidos';
+            break;
+            
+        case 'estados':
+        case 'Ciudades':
+            isValid = field.value !== '';
+            errorMessage = isValid ? '' : 'Este campo es requerido';
+            break;
+            
+        case 'latitud':
+        case 'longitud':
+            isValid = /^-?\d{1,10}\.\d+$/.test(field.value);
+            errorMessage = isValid ? '' : field.id === 'latitud' ? 
+                'Formato de latitud inválido (ej. 19.4326 o -33.8688)' : 
+                'Formato de longitud inválido (ej. -99.1332 o 151.2093)';
+            break;
+            
+        case 'urlWeb':
+            if (field.value) {
+                isValid = /^https?:\/\/.+/.test(field.value);
+                errorMessage = isValid ? '' : 'La URL debe comenzar con http:// o https://';
+            }
+            break;
+            
+        case 'foto':
+            if (field.files.length > 0) {
+                const file = field.files[0];
+                isValid = file.type.startsWith('image/');
+                errorMessage = isValid ? '' : 'Solo se permiten archivos de imagen';
+            }
+            break;
+    }
+    
+    if (field.type !== 'hidden' && field.tagName !== 'SELECT') {
+        if (field.value && !isValid) {
+            field.classList.add('is-invalid');
+            field.classList.remove('is-valid');
+        } else if (field.value && isValid) {
+            field.classList.add('is-valid');
+            field.classList.remove('is-invalid');
+        } else {
+            field.classList.remove('is-valid', 'is-invalid');
+        }
+    }
+    
+    errorElement.textContent = errorMessage;
+    
+    return isValid;
+}
+
+function validateForm() {
+    const form = document.getElementById('form-agregar');
+    const inputs = form.querySelectorAll('input, select');
+    let isValid = true;
+    
+    inputs.forEach(input => {
+        const event = new Event('blur');
+        input.dispatchEvent(event);
+        
+        if (!input.checkValidity() && input.type !== 'hidden' && input.id !== 'urlWeb') {
+            isValid = false;
+        }
+    });
+    
+    return isValid;
+}
