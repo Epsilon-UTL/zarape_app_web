@@ -1,11 +1,69 @@
+// Variables globales
 let listBebida = [];
 let listCategoriaBebida = [];
 let idproducto = null;
 
+// Objeto global para las funciones
+window.controladorGra1 = window.controladorGra1 || {};
+
+// Función para mostrar alerta de éxito
+function mostrarAlertaExito(mensaje) {
+    alert(`✅ Éxito: ${mensaje}`);
+}
+
+// Función para mostrar alerta de error
+function mostrarAlertaError(mensaje) {
+    alert(`❌ Error: ${mensaje}`);
+}
+
+// Función para mostrar confirmación
+function mostrarConfirmacion(mensaje) {
+    return confirm(`⚠️ ${mensaje}\n¿Desea continuar?`);
+}
+
+// Función para validar nombre (solo letras, espacios y acentos)
+function validarNombre(nombre) {
+    const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{2,50}$/;
+    return regex.test(nombre);
+}
+
+// Función para validar descripción
+function validarDescripcion(descripcion) {
+    return descripcion.length <= 200; // Máximo 200 caracteres
+}
+
+// Función para validar precio
+function validarPrecio(precio) {
+    const regex = /^\d+(\.\d{1,2})?$/;
+    return regex.test(precio) && parseFloat(precio) > 0;
+}
+
+// Función para marcar campo como inválido
+function marcarInvalido(elemento, mensaje) {
+    elemento.classList.add('is-invalid');
+    const feedback = elemento.nextElementSibling;
+    if (feedback && feedback.classList.contains('invalid-feedback')) {
+        feedback.textContent = mensaje;
+    }
+}
+
+// Función para marcar campo como válido
+function marcarValido(elemento) {
+    elemento.classList.remove('is-invalid');
+    elemento.classList.add('is-valid');
+}
+
+// Función para limpiar validaciones
+function limpiarValidaciones() {
+    document.querySelectorAll('.is-invalid, .is-valid').forEach(el => {
+        el.classList.remove('is-invalid', 'is-valid');
+    });
+}
+
 // Función para cargar las categorías de bebidas
 export function loadCategoriaBd() {
     let v_categoria = document.getElementById("categoria");
-    v_categoria.innerHTML = ""; // Limpiar opciones existentes
+    v_categoria.innerHTML = '<option value="" selected disabled>Seleccione una categoría</option>';
     
     listCategoriaBebida.forEach(categoria => {
         let v_option = document.createElement("option");
@@ -15,28 +73,95 @@ export function loadCategoriaBd() {
     });
 }
 
+// Event listeners para validación en tiempo real
+document.addEventListener('DOMContentLoaded', function() {
+    const nombreInput = document.getElementById("nombre");
+    const descripcionInput = document.getElementById("descripcion");
+    const precioInput = document.getElementById("precio");
+    const categoriaInput = document.getElementById("categoria");
+    const fotoInput = document.getElementById("foto");
+
+    if (nombreInput) {
+        nombreInput.addEventListener('input', function() {
+            if (!validarNombre(this.value)) {
+                marcarInvalido(this, 'El nombre debe tener entre 2 y 50 caracteres (solo letras y espacios)');
+            } else {
+                marcarValido(this);
+            }
+        });
+    }
+
+    if (descripcionInput) {
+        descripcionInput.addEventListener('input', function() {
+            if (!validarDescripcion(this.value)) {
+                marcarInvalido(this, 'La descripción no debe exceder los 200 caracteres');
+            } else {
+                marcarValido(this);
+            }
+        });
+    }
+
+    if (precioInput) {
+        precioInput.addEventListener('input', function() {
+            if (!validarPrecio(this.value)) {
+                marcarInvalido(this, 'Ingrese un precio válido (ej. 25.99) mayor a 0');
+            } else {
+                marcarValido(this);
+            }
+        });
+    }
+
+    if (categoriaInput) {
+        categoriaInput.addEventListener('change', function() {
+            if (!this.value) {
+                marcarInvalido(this, 'Seleccione una categoría');
+            } else {
+                marcarValido(this);
+            }
+        });
+    }
+
+    if (fotoInput) {
+        fotoInput.addEventListener('change', function() {
+            const imgFeedback = document.getElementById("foto-feedback");
+            if (!this.files || !this.files[0]) {
+                if (imgFeedback) imgFeedback.textContent = 'Seleccione una imagen';
+            } else {
+                if (imgFeedback) imgFeedback.textContent = '';
+            }
+        });
+    }
+});
+
 // Cargar categorías al iniciar
 fetch('http://localhost:8080/Zarape/api/categoria/getAllCategoriaBebidas')
     .then(response => response.json())
     .then(datos => {
-        console.log(datos);
         listCategoriaBebida = datos;
         loadCategoriaBd();
     })
-    .catch(error => console.error("Error al cargar categorías:", error));
+    .catch(error => {
+        console.error("Error al cargar categorías:", error);
+        mostrarAlertaError("No se pudieron cargar las categorías de bebidas");
+    });
 
 // Función para mostrar/ocultar el formulario
 export function mostrarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
-    const btnGuardar = document.getElementById("btn-agregar");
-    btnGuardar.classList.add("d-none");
+    const btnAgregar = document.getElementById("btn-agregar");
+    btnAgregar.classList.add("d-none");
     formularioContenedor.classList.remove("d-none");
+    
+    const btnEliminar = document.getElementById("btn-eliminar");
+    btnEliminar.classList.toggle("d-none", !idproducto);
+    
+    limpiarValidaciones();
 }
 
 export function cancelarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
-    const btnGuardar = document.getElementById("btn-agregar");
-    btnGuardar.classList.remove("d-none");
+    const btnAgregar = document.getElementById("btn-agregar");
+    btnAgregar.classList.remove("d-none");
     formularioContenedor.classList.add("d-none");
     limpiar();
 }
@@ -53,165 +178,290 @@ export function loadBebida() {
     })
     .then(response => response.json())
     .then(registro => {
-        console.log(registro);
         listBebida = registro;
         mostrarInactivos();
     })
-    .catch(error => console.error("Error al cargar bebidas:", error));
+    .catch(error => {
+        console.error("Error al cargar bebidas:", error);
+        mostrarAlertaError("No se pudo cargar la lista de bebidas");
+    });
 }
 
-// Función para agregar una nueva bebida
+// Función para validar formulario completo
+function validarFormulario() {
+    let valido = true;
+    const nombre = document.getElementById("nombre");
+    const precio = document.getElementById("precio");
+    const categoria = document.getElementById("categoria");
+    const descripcion = document.getElementById("descripcion");
+    const foto = document.getElementById("txtaFotoNuevaBebida");
+
+    // Validar nombre
+    if (!nombre.value.trim()) {
+        marcarInvalido(nombre, 'El campo Nombre es obligatorio');
+        valido = false;
+    } else if (!validarNombre(nombre.value)) {
+        marcarInvalido(nombre, 'El nombre debe tener entre 2 y 50 caracteres (solo letras y espacios)');
+        valido = false;
+    }
+
+    // Validar precio
+    if (!precio.value.trim()) {
+        marcarInvalido(precio, 'El campo Precio es obligatorio');
+        valido = false;
+    } else if (!validarPrecio(precio.value)) {
+        marcarInvalido(precio, 'Ingrese un precio válido (ej. 25.99) mayor a 0');
+        valido = false;
+    }
+
+    // Validar categoría
+    if (!categoria.value) {
+        marcarInvalido(categoria, 'Debe seleccionar una categoría');
+        valido = false;
+    }
+
+    // Validar descripción
+    if (descripcion.value && !validarDescripcion(descripcion.value)) {
+        marcarInvalido(descripcion, 'La descripción no debe exceder los 200 caracteres');
+        valido = false;
+    }
+
+    // Validar foto (solo si es nuevo producto)
+    if (!idproducto && !foto.value) {
+        const fotoFeedback = document.getElementById("foto-feedback");
+        if (fotoFeedback) fotoFeedback.textContent = 'Debe seleccionar una imagen para la bebida';
+        valido = false;
+    }
+
+    return valido;
+}
+
+// Función para agregar una nueva bebida con validaciones
 export function agregarBebida() {
+    // Validar formulario antes de continuar
+    if (!validarFormulario()) {
+        mostrarAlertaError("Por favor complete correctamente todos los campos requeridos");
+        return;
+    }
+
     let v_idBebida = document.getElementById("idBebida").value || -1;
     let v_idProducto = idproducto || -1;
-    let v_nombre = document.getElementById("nombre").value;
-    let v_precio = document.getElementById("precio").value;
-    let v_descripcion = document.getElementById("descripcion").value;
+    let v_nombre = document.getElementById("nombre").value.trim();
+    let v_precio = document.getElementById("precio").value.trim();
+    let v_descripcion = document.getElementById("descripcion").value.trim();
     let v_categoria = document.getElementById("categoria").value;
-    let v_foto = document.getElementById("txtaFotoNuevaBebida").value; // Base64 sin prefijo
+    let v_foto = document.getElementById("txtaFotoNuevaBebida").value || 
+                (document.getElementById("imgFoto").src.includes("base64") ? 
+                 document.getElementById("imgFoto").src.split(",")[1] : "");
 
-    if (!v_nombre || !v_precio || !v_descripcion || !v_categoria) {
-        alert("Por favor complete todos los campos obligatorios");
+    // Confirmación antes de guardar
+    const accion = v_idProducto !== -1 ? "actualizar" : "agregar";
+    if (!mostrarConfirmacion(`¿Desea ${accion} esta bebida?`)) {
         return;
     }
 
     let bebida = {
         "idBebida": v_idBebida,
         "producto": {
-            "idProducto": v_idProducto,
+            "idProducto": v_idProducto !== -1 ? v_idProducto : null,
             "nombre": v_nombre,
             "descripcion": v_descripcion,
             "foto": v_foto,
-            "precio": v_precio,
+            "precio": parseFloat(v_precio),
             "categoria": {
                 "idCategoria": v_categoria,
                 "nombre": "",
                 "tipo": "B",
                 "activo": 0
             },
-            "activo": 0
+            "activo": 1
         }
     };
+
+    let endpoint = v_idProducto !== -1 ? 
+        'http://localhost:8080/Zarape/api/bebida/agregarBebida' : 
+        'http://localhost:8080/Zarape/api/bebida/agregarBebida';
 
     let datos_servidor = { datosBebida: JSON.stringify(bebida) };
     let parametro = new URLSearchParams(datos_servidor);
 
-    let username = localStorage.getItem("nombreUsuario");
-
-    let registro = {
+    fetch(endpoint, {
         method: "POST",
-        headers: {
+        headers: { 
             "Content-Type": "application/x-www-form-urlencoded",
-            "username": username
+            "username": localStorage.getItem("nombreUsuario")
         },
         body: parametro
-    };
-
-    fetch('http://localhost:8080/Zarape/api/bebida/agregarBebida', registro)
-        .then(response => response.json())
-        .then(json => {
-            console.log(json);
-            if (json.message === "success") {
-                alert("Bebida guardada exitosamente");
-                return fetch('http://localhost:8080/Zarape/api/bebida/getAllBebida');
-            } else {
-                throw new Error(json.message || "Bebida guardada exitosamente");
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(json => {
+        return fetch('http://localhost:8080/Zarape/api/bebida/getAllBebida', {
+            headers: {
+                "username": localStorage.getItem("nombreUsuario"),
+                "Content-Type": "application/json"
             }
-        })
-        .then(response => response.json())
-        .then(registro => {
-            listBebida = registro;
-            loadBebida();
-            cancelarFormulario();
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            alert(error.message);
         });
+    })
+    .then(response => response.json())
+    .then(registrosActualizados => {
+        listBebida = registrosActualizados;
+        mostrarInactivos();
+        mostrarAlertaExito(v_idProducto !== -1 ? 'Bebida actualizada correctamente' : 'Bebida agregada correctamente');
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        mostrarAlertaError(`No se pudo ${accion} la bebida: ${error.message}`);
+    })
+    .finally(() => {
+        limpiar();
+        cancelarFormulario();
+    });
 }
 
 // Función para seleccionar un registro de la tabla
 export function selectRegistro(indice) { 
-    if (indice >= 0 && indice < listBebida.length) {
-        let bebida = listBebida[indice];
-        document.getElementById("idBebida").value = bebida.idBebida;
-        document.getElementById("nombre").value = bebida.producto.nombre;
-        document.getElementById("precio").value = bebida.producto.precio;
-        document.getElementById("descripcion").value = bebida.producto.descripcion;
-        document.getElementById("categoria").value = bebida.producto.categoria.idCategoria;
-        document.getElementById("txtaFotoNuevaBebida").value = bebida.producto.foto;
-        
-        let imgFoto = document.getElementById("imgFoto");
-        if (bebida.producto.foto) {
-            imgFoto.src = `data:image/jpeg;base64,${bebida.producto.foto}`;
-            imgFoto.style.display = "block";
-        } else {
-            imgFoto.src = "";
-            imgFoto.style.display = "none";
-        }
-        
-        idproducto = bebida.producto.idProducto;
-        mostrarFormulario();
+    if (indice < 0 || indice >= listBebida.length) {
+        mostrarAlertaError("Registro no válido seleccionado");
+        return;
     }
+
+    const bebida = listBebida[indice];
+    document.getElementById("idBebida").value = bebida.idBebida;
+    document.getElementById("nombre").value = bebida.producto.nombre;
+    document.getElementById("precio").value = bebida.producto.precio;
+    document.getElementById("descripcion").value = bebida.producto.descripcion;
+    document.getElementById("categoria").value = bebida.producto.categoria.idCategoria;
+    
+    // Manejo de la imagen
+    const imgFoto = document.getElementById("imgFoto");
+    const txtaFoto = document.getElementById("txtaFotoNuevaBebida");
+    const inputFile = document.getElementById("foto");
+    
+    if (bebida.producto.foto) {
+        // Si ya tenemos base64, mostrarlo directamente
+        imgFoto.src = `data:image/png;base64,${bebida.producto.foto}`;
+        txtaFoto.value = bebida.producto.foto;
+    } else {
+        imgFoto.src = "";
+        txtaFoto.value = "";
+    }
+    
+    // Limpiar el input file
+    inputFile.value = "";
+    
+    idproducto = bebida.producto.idProducto;
+    mostrarFormulario();
 }
 
 // Función para eliminar una bebida
 export function eliminarBebida() {
     if (!idproducto) {
-        alert("No hay bebida seleccionada para eliminar");
+        mostrarAlertaError("Debe seleccionar una bebida primero");
         return;
     }
 
-    if (!confirm("¿Está seguro que desea eliminar esta bebida?")) {
-        return;
-    }
+    if (mostrarConfirmacion("¿Está seguro que desea eliminar esta bebida permanentemente?")) {
+        let datos_servidor = { idProducto: idproducto };
+        let parametro = new URLSearchParams(datos_servidor);
 
-    let datos_servidor = { idProducto: idproducto };
-    let parametro = new URLSearchParams(datos_servidor);
-
-    let registro = {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "username": localStorage.getItem("nombreUsuario")
-        },
-        body: parametro
-    };
-
-    fetch('http://localhost:8080/Zarape/api/bebida/eliminarBebida', registro)
-        .then(response => response.json())
-        .then(json => {
-            console.log(json);
-            if (json.message === "success") {
-                alert("Bebida eliminada exitosamente");
-                loadBebida();
-                cancelarFormulario();
-            } else {
-                throw new Error(json.message || "Bebida eliminada exitosamente");
+        fetch('http://localhost:8080/Zarape/api/bebida/eliminarBebida', {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/x-www-form-urlencoded",
+                "username": localStorage.getItem("nombreUsuario")
+            },
+            body: parametro
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(text => {
+            try {
+                return JSON.parse(text);
+            } catch {
+                return { success: true };
             }
         })
+        .then(() => {
+            return fetch('http://localhost:8080/Zarape/api/bebida/getAllBebida', {
+                headers: {
+                    "username": localStorage.getItem("nombreUsuario"),
+                    "Content-Type": "application/json"
+                }
+            });
+        })
+        .then(response => response.json())
+        .then(registrosActualizados => {
+            listBebida = registrosActualizados;
+            mostrarInactivos();
+            mostrarAlertaExito("Bebida eliminada correctamente");
+        })
         .catch(error => {
-            console.error("Error:", error);
-            alert(error.message);
+            console.error("Error al eliminar:", error);
+            mostrarAlertaError("No se pudo eliminar la bebida: " + error.message);
+        })
+        .finally(() => {
+            limpiar();
+            cancelarFormulario();
         });
+    }
 }
 
 // Función para manejar la carga de fotos
 export function cargarFotografia() {
-    let inputFile = document.getElementById("foto");
-    let imgFoto = document.getElementById("imgFoto");
-    let txtaFoto = document.getElementById("txtaFotoNuevaBebida");
-
-    if (inputFile.files && inputFile.files[0]) {
-        let reader = new FileReader();
-        reader.onload = function(e) {
-            let fotoB64 = e.target.result.split(",")[1]; // Obtiene solo el base64 sin prefijo
-            imgFoto.src = e.target.result;
-            imgFoto.style.display = "block";
-            txtaFoto.value = fotoB64;
-        };
-        reader.readAsDataURL(inputFile.files[0]);
+    const inputFile = document.getElementById("foto");
+    const imgFoto = document.getElementById("imgFoto");
+    const txtaFoto = document.getElementById("txtaFotoNuevaBebida");
+    const imgFeedback = document.getElementById("foto-feedback");
+    
+    if (!inputFile.files || !inputFile.files[0]) {
+        if (imgFeedback) imgFeedback.textContent = 'Por favor seleccione una imagen';
+        return;
     }
+
+    const file = inputFile.files[0];
+    
+    // Validar tipo de archivo
+    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!tiposPermitidos.includes(file.type)) {
+        if (imgFeedback) imgFeedback.textContent = 'El archivo debe ser una imagen (JPEG, PNG, GIF, WEBP)';
+        return;
+    }
+
+    // Validar tamaño (ejemplo: máximo 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+        if (imgFeedback) imgFeedback.textContent = 'La imagen no debe superar los 2MB';
+        return;
+    }
+
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        // Mostrar vista previa
+        imgFoto.src = e.target.result;
+        
+        // Guardar base64 para enviar al servidor
+        const base64String = e.target.result.split(',')[1];
+        txtaFoto.value = base64String;
+        
+        if (imgFeedback) imgFeedback.textContent = '';
+    };
+    
+    reader.onerror = function() {
+        if (imgFeedback) imgFeedback.textContent = 'Error al leer el archivo de imagen';
+        imgFoto.src = "";
+        txtaFoto.value = "";
+    };
+    
+    reader.readAsDataURL(file);
 }
 
 // Función para limpiar el formulario
@@ -223,40 +473,48 @@ export function limpiar() {
     document.getElementById("categoria").value = "";
     document.getElementById("txtaFotoNuevaBebida").value = "";
     document.getElementById("foto").value = "";
-    let imgFoto = document.getElementById("imgFoto");
-    imgFoto.src = "";
-    imgFoto.style.display = "none";
+    document.getElementById("imgFoto").src = "";
     idproducto = null;
+    
+    limpiarValidaciones();
 }
 
 // Función para mostrar bebidas activas/inactivas
 export function mostrarInactivos() {
-    const btnGuardar = document.getElementById("btn-agregar");
+    const btnAgregar = document.getElementById("btn-agregar");
     const btnEliminar = document.getElementById("btn-eliminar");
     let mostrarActivos = document.getElementById("activos").checked;
     let table = document.getElementById("renglones");
-    let renglon = "";
-
+    table.innerHTML = "";
+    
     listBebida.forEach((registro, indice) => {
         if ((mostrarActivos && registro.producto.activo === 1) || 
             (!mostrarActivos && registro.producto.activo === 0)) {
             
-            renglon += `
-                <tr onclick="controladorGra1.selectRegistro(${indice});">
-                    <td>${registro.producto.nombre}</td>
-                    <td>${registro.producto.descripcion}</td>
-                    <td>${registro.producto.precio}</td>
-                    <td>${registro.producto.categoria.descripcion}</td>
-                    <td><img src="${registro.producto.foto ? 'data:image/jpeg;base64,' + registro.producto.foto : ''}" 
-                             alt="Foto Bebida" width="50" 
-                             onerror="this.style.display='none'"></td>
-                </tr>`;
+            const row = document.createElement("tr");
+            row.onclick = () => selectRegistro(indice);
+            
+            // Manejo seguro de la imagen
+            let imagenSrc = '';
+            if (registro.producto.foto) {
+                imagenSrc = `data:image/png;base64,${registro.producto.foto}`;
+            }
+            
+            row.innerHTML = `
+                <td>${registro.producto.nombre}</td>
+                <td>${registro.producto.descripcion}</td>
+                <td>$${parseFloat(registro.producto.precio).toFixed(2)}</td>
+                <td>${registro.producto.categoria.descripcion}</td>
+                <td><img src="${imagenSrc}" alt="Imagen de la bebida" width="50" 
+                     onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='"></td>
+            `;
+            
+            table.appendChild(row);
         }
     });
-
-    table.innerHTML = renglon;
-    btnGuardar.classList.remove("d-none");
-    btnEliminar.classList[mostrarActivos ? "remove" : "add"]("d-none");
+    
+    btnAgregar.classList.toggle("d-none", !mostrarActivos);
+    btnEliminar.classList.toggle("d-none", !mostrarActivos);
 }
 
 // Inicialización al cargar la página

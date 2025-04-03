@@ -8,7 +8,7 @@ public class ConexionMySQL {
     
     public Connection open(){
         String user = "root";
-        String password = "1234";
+        String password = "2704";
         
         String url = "jdbc:mysql://localhost:3306/zarape?useSSL=false&useUnicode=true&characterEncoding=utf-8";
         
