@@ -17,6 +17,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
 
         <!-- Toastify JS -->
         <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+        
     </head>
     <body onload="loadLogin();">
 
@@ -73,6 +74,21 @@ Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit thi
                 document.getElementById('overlay').style.display = 'none';
                 document.getElementById('customLoader').style.display = 'none';
             }
+
+            const originalAlert = window.alert;
+
+            window.alert = function (message) {
+                Toastify({
+                    text: message,
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: "center",
+                    backgroundColor: "linear-gradient(to right, #FAAF08, #ffc371)",
+                    stopOnFocus: true,
+                    onClick: function () {}
+                }).showToast();
+            };
 
         </script>
     </body>
