@@ -59,6 +59,22 @@ async function updateStatus(idComanda, newStatus) {
     }
 }
 
+
+function formatDateFromDB(dateString) {
+    if (!dateString) return 'Fecha no disponible';
+    
+    if (dateString.includes('/') || dateString.trim() === '') return dateString;
+    
+    const parts = dateString.split('-');
+    if (parts.length === 3) {
+        const day = parts[2].padStart(2, '0');
+        const month = parts[1].padStart(2, '0');
+        return `${day}/${month}/${parts[0]}`; 
+    }
+    
+    return dateString; 
+}
+
 // Mostrar comandas en el HTML
 async function displayComandas() {
     const container = document.getElementById('comandas-container');
@@ -71,7 +87,6 @@ async function displayComandas() {
     
     let comandas = await fetchComandas();
     
-    // Filtrar comandas - excluir las canceladas (4) y entregadas (3)
     comandas = comandas.filter(comanda => comanda.estatus !== 3 && comanda.estatus !== 4);
     
     if (comandas.length === 0) {
@@ -88,27 +103,23 @@ async function displayComandas() {
         return;
     }
     
-    // Actualizar contadores
     updateStatusCounters(comandas);
     
     container.innerHTML = '';
     
     comandas.forEach(comanda => {
-        // Verificar si el ticket existe
         const ticket = comanda.ticket || {};
         
-        // Formatear fecha - manejar caso donde fecha no existe
         let fechaFormateada = 'Fecha no disponible';
         if (ticket.fecha) {
-            try {
-                const fecha = new Date(ticket.fecha);
-                fechaFormateada = fecha.toLocaleString();
-            } catch (e) {
-                console.error('Error formateando fecha:', e);
+            const parts = ticket.fecha.split('-');
+            if (parts.length === 3) {
+                fechaFormateada = `${parts[2]}/${parts[1]}/${parts[0]}`; 
+            } else {
+                fechaFormateada = ticket.fecha;
             }
         }
         
-        // Crear card
         const card = document.createElement('div');
         card.className = 'card';
         card.setAttribute('data-id', comanda.idComanda);
@@ -153,7 +164,6 @@ async function displayComandas() {
         
         container.appendChild(card);
         
-        // Cargar detalles solo si tenemos idTicket
         if (ticket.idTicket) {
             loadDetails(ticket.idTicket, comanda.idComanda);
         } else {
