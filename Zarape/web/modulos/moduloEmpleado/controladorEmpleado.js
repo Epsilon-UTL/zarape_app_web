@@ -128,30 +128,32 @@ fetch('http://localhost:8080/Zarape/api/datos/getAllEstados')
     .catch(error => console.error("Error al cargar los estados:", error));
 
 export function loadSucursales() {
+    const username = localStorage.getItem("nombreUsuario");
+    if (!username) return;
+    
     const v_sucursales = document.getElementById("sucursales");
     if (!v_sucursales) return;
     
-    v_sucursales.innerHTML = '';
-    listSucursales.forEach(sucursal => {
-        const option = document.createElement("option");
-        option.value = sucursal.idSucursal;
-        option.text = sucursal.nombre;
-        v_sucursales.appendChild(option);
-    });
+    fetch('http://localhost:8080/Zarape/api/sucursales/getAllSucursales', {
+        method: 'GET',
+        headers: { 
+            "username": username, 
+            "Content-Type": "application/json" 
+        }
+    })
+    .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
+    .then(datos => {
+        listSucursales = datos;
+        v_sucursales.innerHTML = '';
+        listSucursales.forEach(sucursal => {
+            const option = document.createElement("option");
+            option.value = sucursal.idSucursal;
+            option.text = sucursal.nombre;
+            v_sucursales.appendChild(option);
+        });
+    })
+    .catch(error => console.error("Error al cargar las sucursales:", error));
 }
-
-fetch('http://localhost:8080/Zarape/api/sucursales/getAllSucursales', {
-    method: 'GET',
-    headers: {
-        "username": localStorage.getItem("nombreUsuario")   
-    }
-})
-.then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
-.then(datos => {
-    listSucursales = datos;
-    loadSucursales();
-})
-.catch(error => console.error("Error al cargar las sucursales:", error));
 
 export function mostrarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");

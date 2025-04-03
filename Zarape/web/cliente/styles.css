@@ -270,3 +270,13 @@ hr {
         max-height: 300px;
     }
 }
+
+.producto-eliminar {
+    cursor: pointer;
+    color: #dc3545;
+    margin-left: 10px;
+    font-size: 1.2rem;
+}
+.producto-eliminar:hover {
+    color: #bb2d3b;
+}
