@@ -47,36 +47,45 @@ export function inicializarValidaciones() {
     document.getElementById("usuario")?.addEventListener("input", function () {
         validarCampo(
             this,
-            /^[a-zA-Z@]{5,30}$/,
+            /^(?=[^@]*@[^@]*$)[a-zA-Z@]{5,30}$/,
             5,
             30,
             document.getElementById("error-usuario"),
-            "El nombre de usuario debe tener entre 5 y 30 caracteres y solo puede contener letras y el símbolo @."
+            "El nombre de usuario debe tener entre 5 y 30 caracteres, contener exactamente un @ y solo puede contener letras."
         );
     });
 
     document.getElementById("contrasenia")?.addEventListener("input", function () {
-        validarCampo(
-            this,
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$_-])[A-Za-z\d@#$_-]{8,15}$/,
-            8,
-            15,
-            document.getElementById("error-contrasenia"),
-            "La contraseña debe tener entre 8 y 15 caracteres, incluir al menos una mayúscula, una minúscula, un número y un carácter especial (@, #, $, -, _)."
-        );
+        if (this.value.trim()) { // Solo validar si hay contenido
+            validarCampo(
+                this,
+                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$_-])[A-Za-z\d@#$_-]{8,15}$/,
+                8,
+                15,
+                document.getElementById("error-contrasenia"),
+                "La contraseña debe tener entre 8 y 15 caracteres, incluir al menos una mayúscula, una minúscula, un número y un carácter especial (@, #, $, -, _)."
+            );
+        } else {
+            document.getElementById("error-contrasenia").innerHTML = ''; 
+        }
     });
 
     document.getElementById("btn-guardar")?.addEventListener("click", function (event) {
-        const tieneErrores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div").length > 0;
+        const tieneErrores = document.querySelectorAll(`
+            #error-nombre div, 
+            #error-apellidos div, 
+            #error-telefono div, 
+            #error-usuario div,
+            #error-contrasenia div
+        `).length > 0;
 
         if (tieneErrores) {
             event.preventDefault();
-            alert("Completa todos los campos correctamente antes de guardar");
-            }
-        });
-        validacionesInicializadas = true;
-    }
-
+        }
+    });
+    
+    validacionesInicializadas = true;
+}
 
 export function loadCiudades() {
     const v_edo = document.getElementById("estados")?.value;
@@ -105,7 +114,6 @@ fetch('http://localhost:8080/Zarape/api/ciudad/getAllCiudades')
 
 document.getElementById("estados")?.addEventListener('change', loadCiudades);
 
-
 export function loadEstados() {
     const v_estados = document.getElementById("estados");
     if (!v_estados) return;
@@ -119,7 +127,6 @@ export function loadEstados() {
     });
 }
 
-
 fetch('http://localhost:8080/Zarape/api/datos/getAllEstados')
     .then(response => response.ok ? response.json() : Promise.reject('Error en la solicitud'))
     .then(datos => {
@@ -128,17 +135,24 @@ fetch('http://localhost:8080/Zarape/api/datos/getAllEstados')
     })
     .catch(error => console.error("Error al cargar los estados:", error));
 
-
 export function mostrarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
-    const btnGuardar = document.getElementById("btn-agregar");
+    const btnAgregar = document.getElementById("btn-agregar");
     
-    if (formularioContenedor && btnGuardar) {
-        btnGuardar.classList.add("d-none");
+    if (formularioContenedor && btnAgregar) {
+        btnAgregar.classList.add("d-none");
         formularioContenedor.classList.remove("d-none");
+        
+        if (!idPersona) {
+            document.querySelectorAll('#form-agregar input[placeholder]').forEach(input => {
+                const originalPlaceholder = input.getAttribute('data-original-placeholder');
+                if (originalPlaceholder) {
+                    input.placeholder = originalPlaceholder;
+                }
+            });
+        }
     }
 }
-
 
 export function cancelarFormulario() {
     const formularioContenedor = document.getElementById("formulario-contenedor");
@@ -153,7 +167,6 @@ export function cancelarFormulario() {
     limpiarMensajesError();
     validacionesInicializadas = false;
 }
-
 
 export function loadCliente() {
     const username = localStorage.getItem("nombreUsuario");
@@ -171,55 +184,80 @@ export function loadCliente() {
         .catch(error => console.error("Error al cargar los clientes:", error));
 }
 
-
 export function agregarCliente() {
     const username = localStorage.getItem("nombreUsuario");
+    if (!username) {
+        alert("No se encontró información de usuario");
+        return;
+    }
 
-    const camposRequeridos = ["nombre", "apellidos", "telefono", "ciudades", "estados", "usuario", "contrasenia"];
-    const camposVacios = camposRequeridos.some(id => !document.getElementById(id).value.trim());
-
+    // 1. Validar campos vacíos
+    const camposRequeridos = ["nombre", "apellidos", "telefono", "ciudades", "estados", "usuario"];
+    const camposVacios = camposRequeridos.some(id => {
+        const element = document.getElementById(id);
+        return !element?.value.trim();
+    });
+    
     if (camposVacios) {
         alert("Todos los campos son obligatorios.");
         return;
     }
 
-    const errores = document.querySelectorAll("#error-nombre div, #error-apellidos div, #error-telefono div, #error-usuario div, #error-contrasenia div");
-    if (errores.length > 0) {
-        return; 
+    // 2. Validar errores en los campos
+    const tieneErrores = document.querySelectorAll(`
+        #error-nombre div, 
+        #error-apellidos div, 
+        #error-telefono div, 
+        #error-usuario div,
+        #error-contrasenia div
+    `).length > 0;
+
+    if (tieneErrores) {
+        alert("Corrige los errores en el formulario antes de guardar.");
+        return;
     }
 
-    let v_idPersona = idPersona || -1;
-    let v_idUsuario = idUsuario || -1;
-    let v_nombre = document.getElementById("nombre").value;
-    let v_apellidos = document.getElementById("apellidos").value;
-    let v_telefono = document.getElementById("telefono").value;
-    let v_ciudad = document.getElementById("ciudades").value;
-    let v_estado = document.getElementById("estados").value;
-    let v_user = document.getElementById("usuario").value;
-    let v_contrasenia = document.getElementById("contrasenia").value;
+    // 3. Validación especial para la contraseña
+    const contraseniaInput = document.getElementById("contrasenia");
+    if ((!idPersona && !contraseniaInput.value.trim()) || 
+        (contraseniaInput.value.trim() && document.getElementById("error-contrasenia").innerHTML)) {
+        alert("La contraseña es obligatoria para nuevos clientes y debe cumplir con los requisitos si se modifica.");
+        return;
+    }
 
+    // 4. Validación adicional para el @ en usuario
+    const usuario = document.getElementById("usuario").value.trim();
+    const countAt = usuario.split('@').length - 1;
+    if (countAt !== 1) {
+        alert("El nombre de usuario debe contener exactamente un símbolo @");
+        return;
+    }
+
+    // Si pasa todas las validaciones, proceder con el envío
     let cliente = {
-        idCliente: -1, 
+        idCliente: idPersona ? listCliente.find(c => c.persona.idPersona === idPersona)?.idCliente : -1,
         activo: 1,
         persona: {
-            idPersona: v_idPersona,
-            nombre: v_nombre,
-            apellidos: v_apellidos,
-            telefono: v_telefono,
+            idPersona: idPersona || -1,
+            nombre: document.getElementById("nombre").value,
+            apellidos: document.getElementById("apellidos").value,
+            telefono: document.getElementById("telefono").value,
             ciudad: {
-                idCiudad: v_ciudad,
+                idCiudad: document.getElementById("ciudades").value,
                 nombre: "",
                 estado: {
-                    idEstado: v_estado,
+                    idEstado: document.getElementById("estados").value,
                     nombre: ""
                 }
             }
         },
         usuario: {
-            idUsuario: v_idUsuario,
+            idUsuario: idUsuario || -1,
             activo: 1,
-            nombre: v_user,
-            contrasenia: v_contrasenia
+            nombre: usuario,
+            contrasenia: contraseniaInput.value.trim() 
+                ? contraseniaInput.value 
+                : contraseniaInput.dataset.originalPassword || ""
         }
     };
 
@@ -244,25 +282,21 @@ export function agregarCliente() {
         })
         .then(json => {
             console.log(json);
-            fetch('http://localhost:8080/Zarape/api/cliente/getAllCliente', {
+            return fetch('http://localhost:8080/Zarape/api/cliente/getAllCliente', {
                 headers: { "username": username }
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la solicitud');
-                    }
-                    return response.json();
-                })
-                .then(registro => {
-                    listCliente = registro;
-                    loadCliente();
-                })
-                .catch(error => console.error("Error al obtener clientes:", error));
+            });
         })
-        .catch(error => console.error("Error al agregar el cliente:", error));
-
-    limpiar();
-    cancelarFormulario();
+        .then(response => response.json())
+        .then(registro => {
+            listCliente = registro;
+            mostrarInactivos();
+            limpiar();
+            cancelarFormulario();
+        })
+        .catch(error => {
+            console.error("Error al guardar el cliente:", error);
+            alert("Ocurrió un error al guardar el cliente");
+        });
 }
 
 export function eliminarCliente() {
@@ -329,29 +363,52 @@ export function selectRegistro(indice) {
     }
 
     const cliente = listCliente[indice];
+    
     document.getElementById("nombre").value = cliente.persona.nombre;
     document.getElementById("apellidos").value = cliente.persona.apellidos;
     document.getElementById("telefono").value = cliente.persona.telefono;
     document.getElementById("estados").value = cliente.persona.ciudad.estado.idEstado;
-    document.getElementById("ciudades").value = cliente.persona.ciudad.idCiudad;
     document.getElementById("usuario").value = cliente.usuario.nombre;
-    document.getElementById("contrasenia").value = cliente.usuario.contrasenia;
+    document.getElementById("contrasenia").value = "";
+    document.getElementById("contrasenia").placeholder = "Dejar vacío para mantener la actual";
+    document.getElementById("contrasenia").dataset.originalPassword = cliente.usuario.contrasenia;
+    
     idPersona = cliente.persona.idPersona;
     idUsuario = cliente.usuario.idUsuario;
-    mostrarFormulario();
-
-    // Asegurar que las ciudades se carguen correctamente
+    
     loadCiudades();
     setTimeout(() => {
         document.getElementById("ciudades").value = cliente.persona.ciudad.idCiudad;
-    }, 10);
+    }, 100);
+    
+    mostrarFormulario();
 }
 
 export function limpiar() {
-    const campos = ["nombre", "apellidos", "telefono", "estados", "ciudades", "usuario", "contrasenia"];
+    const campos = ["nombre", "apellidos", "telefono", "usuario", "contrasenia"];
     campos.forEach(id => {
-        document.getElementById(id).value = "";
+        const element = document.getElementById(id);
+        if (element) {
+            element.value = "";
+            // Restaurar placeholder original
+            const originalPlaceholder = element.getAttribute('data-original-placeholder');
+            if (originalPlaceholder) {
+                element.placeholder = originalPlaceholder;
+            }
+            if (id === "contrasenia") {
+                delete element.dataset.originalPassword;
+            }
+        }
     });
+
+    const estados = document.getElementById("estados");
+    const ciudades = document.getElementById("ciudades");
+    if (estados) estados.value = "";
+    if (ciudades) {
+        ciudades.innerHTML = '<option value="">Seleccione una ciudad</option>';
+        ciudades.value = "";
+    }
+
     idPersona = null;
     idUsuario = null;
 }
@@ -388,17 +445,29 @@ export function mostrarInactivos() {
 }
 
 function validarCampo(input, regex, minLength, maxLength, errorDiv, mensajeError) {
-    if (!input || !errorDiv) return;
+    if (!input || !errorDiv) return false; 
 
     const valor = input.value.trim();
     errorDiv.innerHTML = '';
 
-    if (!valor || valor.length < minLength || valor.length > maxLength || !regex.test(valor)) {
+    let valido = true;
+    
+    if (!valor) {
+        valido = false;
+    } else if (valor.length < minLength || valor.length > maxLength) {
+        valido = false;
+    } else if (regex && !regex.test(valor)) {
+        valido = false;
+    }
+
+    if (!valido) {
         const errorItem = document.createElement("div");
         errorItem.style.color = "red";
         errorItem.innerHTML = mensajeError;
         errorDiv.appendChild(errorItem);
     }
+
+    return valido; // Retorna true si el campo es válido
 }
 
 export function cerrarSesion() {

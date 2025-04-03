@@ -41,27 +41,9 @@ async function fetchComandas() {
     }
 }
 
-// Actualizar estatus en el backend
-async function updateStatus(idComanda, newStatus) {
-    try {
-        const response = await fetch(`http://localhost:8080/Zarape/api/comanda/changeStatus?idComanda=${idComanda}&estatus=${newStatus}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            }
-        });
-        
-        if (!response.ok) throw new Error('Error al actualizar estatus');
-        return await response.json();
-    } catch (error) {
-        console.error('Error al actualizar estatus:', error);
-        return { error: error.message };
-    }
-}
-
 // Mostrar comandas en el HTML
 async function displayComandas() {
-     const container = document.getElementById('comandas-container');
+    const container = document.getElementById('comandas-container');
     container.innerHTML = `
         <div class="loading">
             <div class="loading-spinner"></div>
@@ -69,7 +51,10 @@ async function displayComandas() {
         </div>
     `;
     
-    const comandas = await fetchComandas();
+    let comandas = await fetchComandas();
+    
+    // Filtrar comandas - excluir las canceladas (4) y entregadas (3)
+    comandas = comandas.filter(comanda => comanda.estatus !== 3 && comanda.estatus !== 4);
     
     if (comandas.length === 0) {
         container.innerHTML = `
@@ -209,72 +194,23 @@ async function loadDetails(idTicket, idComanda) {
     }
 }
 
-// Manejar cambio de estatus (visual)
-function handleStatusChange(select, idComanda) {
-    const newStatus = parseInt(select.value);
-    const card = document.querySelector(`.card[data-id="${idComanda}"]`);
-    if (!card) return;
+// Función para actualizar los contadores de estado
+function updateStatusCounters(comandas) {
+    const counts = {
+        1: 0, // En proceso
+        2: 0, // Terminado
+        3: 0  // Entregado
+    };
     
-    const statusBadge = card.querySelector('.status-badge');
-    if (statusBadge) {
-        // Actualizar visualmente
-        statusBadge.className = `status-badge status-${newStatus}`;
-        statusBadge.innerHTML = `
-            <i class="${statusIcons[newStatus]}"></i>
-            ${statusText[newStatus] || 'Desconocido'}
-        `;
-    }
-}
-
-// Guardar cambios en el backend
-async function saveChanges(idComanda) {
-    const card = document.querySelector(`.card[data-id="${idComanda}"]`);
-    if (!card) return;
-    
-    const select = card.querySelector('.status-selector');
-    const saveBtn = card.querySelector('.save-btn');
-    if (!select || !saveBtn) return;
-    
-    const newStatus = parseInt(select.value);
-    
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Guardando...';
-    
-    try {
-        const result = await updateStatus(idComanda, newStatus);
-        
-        if (result.error) {
-            throw new Error(result.error);
+    comandas.forEach(comanda => {
+        if (comanda.estatus in counts) {
+            counts[comanda.estatus]++;
         }
-        
-        showToast('Estado actualizado correctamente');
-    } catch (error) {
-        console.error('Error al guardar:', error);
-        showToast('Error al actualizar: ' + error.message, 'error');
-        
-        // Revertir visualmente
-        const statusBadge = card.querySelector('.status-badge');
-        if (statusBadge) {
-            const currentStatus = select.getAttribute('data-current-status');
-            if (currentStatus) {
-                select.value = currentStatus;
-                handleStatusChange(select, idComanda);
-            }
-        }
-    } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Cambios';
-    }
-}
-
-// Inicializar
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Inicializando vista de comandas...');
-    displayComandas();
+    });
     
-    // Actualizar automáticamente cada 30 segundos
-    setInterval(refreshData, 30000);
-});
+    document.getElementById('pending-count').querySelector('span').textContent = `${counts[1]} En proceso`;
+    document.getElementById('completed-count').querySelector('span').textContent = `${counts[2]} Terminadas`;
+}
 
 // Mostrar notificación toast
 function showToast(message, type = 'success') {
@@ -297,25 +233,6 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// Función para actualizar los contadores de estado
-function updateStatusCounters(comandas) {
-    const counts = {
-        1: 0, // En proceso
-        2: 0, // Terminado
-        3: 0  // Entregado
-    };
-    
-    comandas.forEach(comanda => {
-        if (comanda.estatus in counts) {
-            counts[comanda.estatus]++;
-        }
-    });
-    
-    document.getElementById('pending-count').querySelector('span').textContent = `${counts[1]} En proceso`;
-    document.getElementById('completed-count').querySelector('span').textContent = `${counts[2]} Terminadas`;
-    document.getElementById('delivered-count').querySelector('span').textContent = `${counts[3]} Entregadas`;
-}
-
 // Función para refrescar los datos
 async function refreshData() {
     const refreshBtn = document.querySelector('.refresh-btn');
@@ -330,3 +247,12 @@ async function refreshData() {
     }
     showToast('Datos actualizados');
 }
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Inicializando vista de comandas...');
+    displayComandas();
+    
+    // Actualizar automáticamente cada 30 segundos
+    setInterval(refreshData, 50000);
+});

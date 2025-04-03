@@ -15,11 +15,10 @@
             </div>
             <i class="fa-solid fa-house fa-2xl" onclick="loadInicio();"></i><br>
                 <span>Inicio</span>
-                <i class="fas fa-power-off fa-2xl mt-3" onclick="controladorGra1.cerrarSesion();"></i><br>
-                <span>Cerrar Sesión</span>
+            <i class="fas fa-power-off fa-2xl mt-3" onclick="controladorGra1.cerrarSesion();"></i><br>
+            <span>Cerrar Sesión</span>
         </div>
 
-        <!-- Contenido principal -->
         <main class="main" id="main-content">
             <!-- Aquí va el contenido principal de la página -->
             <div id="content" class="container-fluid" onload="controladorGra1.loadEstados(); loadCliente();">
@@ -44,20 +43,26 @@
       <div class="row mb-2">
         <div class="col-md-6 col-sm-12">
           <label for="nombre">Nombre</label>
-          <input type="text" id="nombre" class="form-control" placeholder="Ej: Juan (solo letras, sin acentos)" />
-          <div id="error-nombre"></div>
+            <input type="text" id="nombre" class="form-control" 
+                   placeholder="Ej: Juan (solo letras, sin acentos)" 
+                   data-original-placeholder="Ej: Juan (solo letras, sin acentos)" />          
+            <div id="error-nombre"></div>
         </div>
       </div>
       <div class="row mb-2">
         <div class="col-md-6 col-sm-12">
           <label for="apellidos">Apellidos</label>
-          <input type="text" id="apellidos" class="form-control" placeholder="Ej: Pérez López (solo letras, sin acentos)" />
-          <div id="error-apellidos"></div>
+            <input type="text" id="apellidos" class="form-control" 
+                   placeholder="Ej: Pérez López (solo letras, sin acentos)" 
+                   data-original-placeholder="Ej: Pérez López (solo letras, sin acentos)" />          
+            <div id="error-apellidos"></div>
         </div>
         <div class="col-md-6 col-sm-12">
           <label for="telefono">Teléfono</label>
-          <input type="tel" id="telefono" class="form-control" placeholder="Ej: 5512345678 (10 dígitos exactos)" />
-          <div id="error-telefono"></div>
+            <input type="tel" id="telefono" class="form-control" 
+                   placeholder="Ej: 5512345678 (10 dígitos exactos)" 
+                   data-original-placeholder="Ej: 5512345678 (10 dígitos exactos)" />
+            <div id="error-telefono"></div>
         </div>
       </div>
       <div class="row mb-2">
@@ -77,13 +82,17 @@
       <div class="row mb-2">
         <div class="col-md-6 col-sm-12">
           <label for="usuario">Nombre de Usuario</label>
-          <input type="text" id="usuario" class="form-control" placeholder="Ej: usuario@ (debe incluir @, 5-30 caracteres)" />
-          <div id="error-usuario"></div>
+            <input type="text" id="usuario" class="form-control" 
+                   placeholder="Ej: usuario@" 
+                   data-original-placeholder="Ej: usuario@" />
+            <div id="error-usuario"></div>
         </div>
         <div class="col-md-6 col-sm-12">
           <label for="contrasenia">Contraseña</label>
-          <input type="password" id="contrasenia" class="form-control" placeholder="Ej: Pass@123 (8-15 caracteres, mayúscula, número y especial)" />
-          <div id="error-contrasenia"></div>
+            <input type="password" id="contrasenia" class="form-control" 
+                   placeholder="Ej: Pass@123" 
+                   data-original-placeholder="Ej: Pass@123" />
+            <div id="error-contrasenia"></div>
         </div>
       </div>
       <div class="row mb-2">

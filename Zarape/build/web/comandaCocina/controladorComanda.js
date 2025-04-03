@@ -61,7 +61,7 @@ async function updateStatus(idComanda, newStatus) {
 
 // Mostrar comandas en el HTML
 async function displayComandas() {
-     const container = document.getElementById('comandas-container');
+    const container = document.getElementById('comandas-container');
     container.innerHTML = `
         <div class="loading">
             <div class="loading-spinner"></div>
@@ -69,7 +69,10 @@ async function displayComandas() {
         </div>
     `;
     
-    const comandas = await fetchComandas();
+    let comandas = await fetchComandas();
+    
+    // Filtrar comandas - excluir las canceladas (4) y entregadas (3)
+    comandas = comandas.filter(comanda => comanda.estatus !== 3 && comanda.estatus !== 4);
     
     if (comandas.length === 0) {
         container.innerHTML = `
@@ -260,6 +263,36 @@ async function saveChanges(idComanda) {
         }
         
         showToast('Estado actualizado correctamente');
+        
+        // Si el nuevo estado es Cancelado (4) o Entregado (3), quitar la comanda de la vista
+        if (newStatus === 3 || newStatus === 4) {
+            card.remove();
+            
+            // Volver a cargar los contadores
+            const remainingComandas = Array.from(document.querySelectorAll('.card'))
+                .map(card => {
+                    return {
+                        idComanda: parseInt(card.getAttribute('data-id')),
+                        estatus: parseInt(card.querySelector('.status-selector').value)
+                    };
+                });
+            
+            updateStatusCounters(remainingComandas);
+            
+            // Si no quedan comandas, mostrar estado vacío
+            if (remainingComandas.length === 0) {
+                const container = document.getElementById('comandas-container');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-clipboard"></i>
+                        </div>
+                        <h3>No hay comandas para mostrar</h3>
+                        <p>Actualmente no hay comandas pendientes o en proceso.</p>
+                    </div>
+                `;
+            }
+        }
     } catch (error) {
         console.error('Error al guardar:', error);
         showToast('Error al actualizar: ' + error.message, 'error');
@@ -279,14 +312,24 @@ async function saveChanges(idComanda) {
     }
 }
 
-// Inicializar
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Inicializando vista de comandas...');
-    displayComandas();
+// Función para actualizar los contadores de estado
+function updateStatusCounters(comandas) {
+    const counts = {
+        1: 0, // En proceso
+        2: 0, // Terminado
+        3: 0, // Entregado
+        4: 0  // Cancelado
+    };
     
-    // Actualizar automáticamente cada 30 segundos
-    setInterval(refreshData, 30000);
-});
+    comandas.forEach(comanda => {
+        if (comanda.estatus in counts) {
+            counts[comanda.estatus]++;
+        }
+    });
+    
+    document.getElementById('pending-count').querySelector('span').textContent = `${counts[1]} En proceso`;
+    document.getElementById('completed-count').querySelector('span').textContent = `${counts[2]} Terminadas`;
+}
 
 // Mostrar notificación toast
 function showToast(message, type = 'success') {
@@ -309,25 +352,6 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-// Función para actualizar los contadores de estado
-function updateStatusCounters(comandas) {
-    const counts = {
-        1: 0, // En proceso
-        2: 0, // Terminado
-        3: 0  // Entregado
-    };
-    
-    comandas.forEach(comanda => {
-        if (comanda.estatus in counts) {
-            counts[comanda.estatus]++;
-        }
-    });
-    
-    document.getElementById('pending-count').querySelector('span').textContent = `${counts[1]} En proceso`;
-    document.getElementById('completed-count').querySelector('span').textContent = `${counts[2]} Terminadas`;
-    document.getElementById('delivered-count').querySelector('span').textContent = `${counts[3]} Entregadas`;
-}
-
 // Función para refrescar los datos
 async function refreshData() {
     const refreshBtn = document.querySelector('.refresh-btn');
@@ -342,3 +366,12 @@ async function refreshData() {
     }
     showToast('Datos actualizados');
 }
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Inicializando vista de comandas...');
+    displayComandas();
+    
+    // Actualizar automáticamente cada 30 segundos
+    setInterval(refreshData, 50000);
+});

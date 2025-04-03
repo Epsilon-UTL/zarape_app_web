@@ -7,7 +7,6 @@ let apiTicket = 'ticket/agregarTicket';
 let apiComanda = 'comanda/agregarComanda';
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Obtener alimentos
     fetch(servidor + apiAlimentos)
             .then(response => response.json())
             .then(datos => {
@@ -20,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
             })
             .catch(error => console.error('Error al obtener los datos de alimentos:', error));
 
-    // Obtener bebidas
     fetch(servidor + apiBebidas)
             .then(response => response.json())
             .then(datos => {
@@ -87,10 +85,9 @@ function mostrarModalProducto(productoId) {
         modalPrecio.innerHTML = `<strong>Precio no disponible</strong>`;
     }
 
-    // Limpiar y mostrar categoría del producto
     const modalCategoria = document.createElement('p');
     modalCategoria.innerHTML = `<strong>Categoría: </strong>${producto.categoria.descripcion}`;
-    modalDescripcion.innerHTML = ''; // Limpiar descripción antes de agregar
+    modalDescripcion.innerHTML = ''; 
     modalDescripcion.appendChild(modalCategoria);
 
     console.log(producto);
@@ -122,9 +119,9 @@ function actualizarCantidadEnTarjeta(idProducto) {
     if (cantidadSpan) {
         if (pedido && pedido.cantidad > 0) {
             cantidadSpan.textContent = `Cantidad actual: ${pedido.cantidad}`;
-            cantidadSpan.style.display = "inline"; // Mostrar etiqueta
+            cantidadSpan.style.display = "inline"; 
         } else {
-            cantidadSpan.style.display = "none"; // Ocultar etiqueta si la cantidad es 0
+            cantidadSpan.style.display = "none"; 
         }
     }
 }
@@ -136,7 +133,7 @@ function actualizarComanda() {
     const ivaElem = document.getElementById('iva');
     const totalElem = document.getElementById('total');
 
-    pedidosLista.innerHTML = ''; // Limpia la lista antes de actualizar
+    pedidosLista.innerHTML = ''; 
     let subtotal = 0;
 
     pedidos.forEach(pedido => {
@@ -149,9 +146,14 @@ function actualizarComanda() {
 
         listItem.innerHTML = `
             <div class="d-flex justify-content-between align-items-center">
-                <button class="btn btn-sm btn-outline-light me-2" onclick="modificarCantidad(${pedido.idProducto}, -1)">-</button>
-                <span class="cantidad">${pedido.cantidad}</span>
-                <button class="btn btn-sm btn-outline-light ms-2" onclick="modificarCantidad(${pedido.idProducto}, 1)">+</button>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-sm btn-outline-light me-2" onclick="modificarCantidad(${pedido.idProducto}, -1)">-</button>
+                    <span class="cantidad">${pedido.cantidad}</span>
+                    <button class="btn btn-sm btn-outline-light ms-2" onclick="modificarCantidad(${pedido.idProducto}, 1)">+</button>
+                </div>
+                <button class="btn btn-sm btn-danger ms-2" onclick="eliminarProductoCompletamente(${pedido.idProducto})">
+                    <i class="bi bi-trash"></i>
+                </button>
             </div>
             <div class="fw-bold">${pedido.nombre}</div>
             <div class="text-muted">Precio: $${pedido.precio.toFixed(2)}</div>
@@ -238,11 +240,9 @@ function cancelarPedido() {
 document.getElementById('pagoTipo').addEventListener('change', function () {
     const tipoPago = this.value;
 
-    // Ocultar todos los campos primero
     document.getElementById('tarjetaInfo').style.display = 'none';
     document.getElementById('paypalInfo').style.display = 'none';
 
-    // Mostrar los campos según el tipo de pago seleccionado
     if (tipoPago === 'tarjeta') {
         document.getElementById('tarjetaInfo').style.display = 'block';
     } else if (tipoPago === 'paypal') {
@@ -256,12 +256,10 @@ function mostrarModalPago() {
     const resumenIva = document.getElementById('resumenIva');
     const resumenTotal = document.getElementById('resumenTotal');
 
-    // Limpiar la lista antes de actualizar
     resumenLista.innerHTML = '';
 
     let subtotal = 0;
 
-    // Agregar cada pedido al resumen
     pedidos.forEach(pedido => {
         const listItem = document.createElement('li');
         listItem.className = 'list-group-item';
@@ -276,16 +274,13 @@ function mostrarModalPago() {
         subtotal += pedido.precio * pedido.cantidad;
     });
 
-    // Calcular IVA y total
     const iva = subtotal * IVA;
     const total = subtotal + iva;
 
-    // Actualizar los totales en el resumen
     resumenSubtotal.textContent = `$${subtotal.toFixed(2)}`;
     resumenIva.textContent = `$${iva.toFixed(2)}`;
     resumenTotal.textContent = `$${total.toFixed(2)}`;
 
-    // Mostrar el modal de pago
     const pagoModal = new bootstrap.Modal(document.getElementById('pagoModal'));
     document.getElementById('pagoMensaje').innerText = '';
     pagoModal.show();
@@ -296,7 +291,6 @@ function realizarPago() {
     const pagoModal = bootstrap.Modal.getInstance(document.getElementById('pagoModal'));
     const confirmacionModal = new bootstrap.Modal(document.getElementById('confirmacionModal'));
 
-    // Validación de método de pago (tu lógica original)
     if (tipoPago === "tarjeta") {
         const numeroTarjeta = document.getElementById('tarjetaNumero').value;
         if (!numeroTarjeta) {
@@ -316,16 +310,12 @@ function realizarPago() {
         return;
     }
 
-    // Mostrar carga en el modal de pago
     document.getElementById('pagoMensaje').innerHTML = '<div class="spinner-border" role="status"></div> Procesando...';
 
-    // Registrar el ticket
     registrarTicket()
         .then(data => {
-            // Cerrar modal de pago
             pagoModal.hide();
             
-            // Preparar mensaje de éxito
             let mensajeExito = `
                 <div class="text-center">
                     <div class="mb-3">
@@ -335,22 +325,19 @@ function realizarPago() {
                     <p>Método de pago: <strong>${tipoPago.toUpperCase()}</strong></p>
                     ${tipoPago === "tarjeta" ? `<p>Tarjeta terminada en: <strong>${document.getElementById('tarjetaNumero').value.slice(-4)}</strong></p>` : ''}
                     ${tipoPago === "paypal" ? `<p>Correo PayPal: <strong>${document.getElementById('paypalCorreo').value}</strong></p>` : ''}
-                    <p class="mt-3">Número de ticket: <strong>${data.idComanda}</strong></p>
+                    <p class="mt-3">Número de comanda: <strong>${data.idComanda}</strong></p>
                     <p>Total: <strong>${document.getElementById('resumenTotal').textContent}</strong></p>
                 </div>
             `;
             
-            // Mostrar en modal de confirmación
             document.getElementById('confirmacionMensaje').innerHTML = mensajeExito;
             confirmacionModal.show();
             
-            // Limpiar pedido después de cerrar confirmación
             confirmacionModal._element.addEventListener('hidden.bs.modal', () => {
                 cancelarPedido();
             }, { once: true });
         })
         .catch(error => {
-            // Mostrar error en modal de confirmación
             document.getElementById('confirmacionMensaje').innerHTML = `
                 <div class="text-center">
                     <div class="mb-3">
@@ -363,12 +350,10 @@ function realizarPago() {
             `;
             confirmacionModal.show();
             
-            // Restablecer mensaje en modal de pago
             document.getElementById('pagoMensaje').innerText = '';
         });
 }
 
-// Función para registrar el ticket (estructura exacta que espera el servicio)
 function registrarTicket() {
     return new Promise((resolve, reject) => {
         if (pedidos.length === 0) {
@@ -376,11 +361,10 @@ function registrarTicket() {
             return;
         }
 
-        // Estructura EXACTA que espera el backend
         const ticketData = {
             ticket: {
-                idCliente: 1, // Reemplaza con tu lógica para obtener el ID real
-                idSucursal: 1 // Reemplaza con tu lógica para obtener la sucursal
+                idCliente: 1, 
+                idSucursal: 1 
             },
             detalles: pedidos.map(pedido => ({
                 idProducto: pedido.idProducto,
@@ -404,4 +388,11 @@ function registrarTicket() {
         .then(data => resolve(data))
         .catch(error => reject(error));
     });
+}
+
+function eliminarProductoCompletamente(idProducto) {
+    pedidos = pedidos.filter(p => p.idProducto !== idProducto);
+    
+    actualizarComanda();
+    actualizarCantidadEnTarjeta(idProducto);
 }
